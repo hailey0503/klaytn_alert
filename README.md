@@ -64,7 +64,7 @@ WhaleAlert backend is deployed on AWS EC2 for scalability and reliability.
 
 ## Contact
 
-For any inquiries or questions, please reach out to us at [haileypong@berkeley.edu].
+For any inquiries or questions, please reach out to us at haileypong@berkeley.edu.
 
 ---
 
