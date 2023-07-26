@@ -1,7 +1,7 @@
 require("dotenv").config();
 const ethers = require('ethers');
-const winston = require('./winston.js')
-const { userClient, bearer} = require('./twitterClient.js')
+const winston = require('../winston.js')
+const { userClient, bearer} = require('../twitterClient.js')
 
 async function main() {
   //const wsUrl = "wss://klaytn01.fautor.app/ws/";

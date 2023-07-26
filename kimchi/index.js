@@ -1,8 +1,8 @@
 require("dotenv").config();
 const ethers = require("ethers");
-const winston = require("./winston.js");
-const { userClient } = require("./twitterClient.js");
-const { sendMessage } = require("./telegram.js")
+const winston = require("../winston.js");
+const { userClient } = require("../twitterClient.js");
+const { sendMessage } = require("../telegram.js")
 
 
 async function main() {
