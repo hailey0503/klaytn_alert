@@ -60,11 +60,11 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Deployment
 
-WhaleAlert backend is deployed on [AWS Lambda](https://aws.amazon.com/lambda/) and [AWS API Gateway](https://aws.amazon.com/api-gateway/) for scalability and reliability.
+WhaleAlert backend is deployed on [AWS EC2]) for scalability and reliability.
 
 ## Contact
 
-For any inquiries or questions, please reach out to us at [contact@example.com](mailto:contact@example.com).
+For any inquiries or questions, please reach out to us at [haileypong@berkeley.edu].
 
 ---
 
