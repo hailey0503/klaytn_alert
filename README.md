@@ -19,9 +19,11 @@ WhaleAlert is a powerful Node.js backend project that introduces a cutting-edge 
 
 1. Clone the repository:
 
-   ```
-  git clone https://github.com/your-username/whaleAlert.git
-   ```
+
+```
+git clone https://github.com/your-username/whaleAlert.git
+```
+
 
 2. Install dependencies:
 
