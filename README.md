@@ -70,4 +70,4 @@ For any inquiries or questions, please reach out to us at haileypong@berkeley.ed
 
 Experience the power of WhaleAlert's Node.js backend as it delivers real-time blockchain transaction alerts through your favorite communication channels. Leverage blockchain sentiment analysis to make informed decisions. Join us on this exciting journey to stay ahead in the blockchain world!
 
-We welcome your contributions and feedback. Happy alerting with WhaleAlert! 😊
+We welcome your contributions and feedback. WAMI with WhaleAlert! 😊
