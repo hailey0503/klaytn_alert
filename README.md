@@ -60,7 +60,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Deployment
 
-WhaleAlert backend is deployed on [AWS EC2]) for scalability and reliability.
+WhaleAlert backend is deployed on AWS EC2 for scalability and reliability.
 
 ## Contact
 
