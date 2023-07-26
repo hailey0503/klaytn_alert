@@ -1,6 +1,5 @@
-# WhaleAlert - Real-Time Blockchain Transaction Alerting Service (Node.js Backend)
+# WhaleAlert - Real-Time Blockchain Transaction Alerting Service 
 
-![WhaleAlert Logo](https://example.com/whalealert_logo.png)
 
 ## Overview
 
@@ -21,13 +20,13 @@ WhaleAlert is a powerful Node.js backend project that introduces a cutting-edge 
 1. Clone the repository:
 
    ```
-   git clone https://github.com/your-username/whaleAlert.git
+  git clone https://github.com/your-username/whaleAlert.git
    ```
 
 2. Install dependencies:
 
    ```
-   cd whalealert
+   cd whaleAlert
    npm install
    ```
 
