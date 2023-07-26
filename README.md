@@ -3,7 +3,7 @@
 
 ## Overview
 
-WhaleAlert is a powerful Node.js backend project that introduces a cutting-edge alerting service, providing real-time notifications for significant blockchain transactions. With automated notification bots for Twitter, Telegram, and Discord, users can stay informed about blockchain activities across their preferred communication channels. Additionally, the project incorporates blockchain sentiment analysis capabilities, empowering users to make informed decisions based on the latest blockchain insights.
+WhaleAlert is a powerful Node.js backend project that introduces a cutting-edge alerting service, providing real-time notifications for significant blockchain transactions. With automated notification bots for Twitter, Telegram, and Discord, users can stay informed about blockchain activities across their preferred communication channels. Additionally, the project incorporates blockchain sentiment analysis capabilities, empowering users to make informed decisions based on the latest blockchain insights. Currently support Klaytn and WolrdCoin.
 
 ## Features
 
