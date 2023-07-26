@@ -1,4 +1,4 @@
-# WhaleAlert - Real-Time Blockchain Transaction Alerting Service 
+# 🐋 WhaleAlert - Real-Time Blockchain Transaction Alerting Service 
 
 
 ## Overview
