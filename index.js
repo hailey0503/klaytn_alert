@@ -1,17 +1,17 @@
 require("dotenv").config();
 const ethers = require("ethers");
-const winston = require("../winston.js");
-const { userClient } = require("../twitterClient.js");
-const { sendMessage } = require("../telegram.js")
+const winston = require("./winston.js");
+const { userClient } = require("./twitterClient.js");
+const { sendMessage } = require("./telegram.js")
 
 
 async function main() {
   const wsUrl = process.env.wsUrl;
-  // winston.warn(wsUrl);
+  winston.warn(wsUrl);
   const networkId = 8217;
 
   const provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
-
+  //winston.warn('14')
   // subscribe new block
   provider.on("block", async (block) => {
     try {
