@@ -1,9 +1,9 @@
-# 🐋 WhaleAlert - Real-Time Blockchain Transaction Alerting Service 
+# 🐋 KlaytnAlert - Real-Time Blockchain Transaction Alerting Service 
 
 
 ## Overview
 
-WhaleAlert is a powerful Node.js backend project that introduces a cutting-edge alerting service, providing real-time notifications for significant blockchain transactions. With automated notification bots for Twitter, Telegram, and Discord, users can stay informed about blockchain activities across their preferred communication channels. Additionally, the project incorporates blockchain sentiment analysis capabilities, empowering users to make informed decisions based on the latest blockchain insights. Currently support #Klay and #WLD.
+KlaytnAlert is a powerful Node.js backend project that introduces a cutting-edge alerting service, providing real-time notifications for significant blockchain transactions. With automated notification bots for Twitter, Telegram, and Discord, users can stay informed about blockchain activities across their preferred communication channels. Additionally, the project incorporates blockchain sentiment analysis capabilities, empowering users to make informed decisions based on the latest blockchain insights. Currently support #Klay and #WLD.
 
 ## Features
 
@@ -39,14 +39,9 @@ git clone https://github.com/your-username/whaleAlert.git
 1. Run the Node.js server:
 
    ```
-   cd kimchi
    node index.js
    ```
-   or
-   ```
-   cd worldcoin
-   node.worldCoin.js
-   ```
+   
 
 3. Access the backend service via the specified endpoints to configure alert preferences.
 
@@ -60,7 +55,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Deployment
 
-WhaleAlert backend is deployed on AWS EC2 for scalability and reliability.
+klaytnAlert backend is deployed on AWS EC2 for scalability and reliability.
 
 ## Contact
 
@@ -68,6 +63,6 @@ For any inquiries or questions, please reach out to us at haileypong@berkeley.ed
 
 ---
 
-Experience the power of WhaleAlert's Node.js backend as it delivers real-time blockchain transaction alerts through your favorite communication channels. Leverage blockchain sentiment analysis to make informed decisions. Join us on this exciting journey to stay ahead in the blockchain world!
+Experience the power of klaytnAlert's Node.js backend as it delivers real-time blockchain transaction alerts through your favorite communication channels. Leverage blockchain sentiment analysis to make informed decisions. Join us on this exciting journey to stay ahead in the blockchain world!
 
-We welcome your contributions and feedback. WAMI with WhaleAlert! 😊
+We welcome your contributions and feedback. WAMI with klaytnAlert! 😊
