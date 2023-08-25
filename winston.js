@@ -73,7 +73,7 @@ const logger = winston.createLogger({
     new winston.transports.File(options.file),
 	new winston.transports.Console(options.console),
 	new DiscordTransport({
-		webhook: process.env.discordURL,
+		webhook: process.env.discordWebhookURL,
 		defaultMeta: { service: 'my_kimchi_service' },
 		level: 'warn'
 	  })

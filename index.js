@@ -3,6 +3,7 @@ const ethers = require("ethers");
 const winston = require("./winston.js");
 const { userClient } = require("./twitterClient.js");
 const { sendMessage } = require("./telegram.js")
+const { discordClient, sendDiscordMessage } = require("./discord.js");
 
 
 async function main() {
@@ -20,20 +21,26 @@ async function main() {
 
       var len = transactions.length;
 
-      winston.debug(len);
+      winston.debug('24',len);
 
       for (let i = 0; i < len; i++) {
+        winston.debug('27',i);
         const thisTx = transactions[i]; //provider.getTransaction
-
+        //winston.debug('29',thisTx);
         const value = thisTx["value"];
         const txHash = thisTx["hash"];
-        const whaleThreshold = ethers.utils.parseEther("100000");
-
+        const whaleThreshold = ethers.utils.parseEther("10");
+        winston.debug('33',whaleThreshold);
         if (value.gte(whaleThreshold)) {
+          winston.debug('35 in')
           const fromAddress = thisTx["from"];
           const toAddress = thisTx["to"];
+          winston.debug(fromAddress)
+          winston.debug(toAddress)
           const walletFromName = await fetchWalletInfo(fromAddress);
+          winston.debug('41', walletFromName)
           const walletToName = await fetchWalletInfo(toAddress);
+          winston.debug('43', walletToName)
           const link = "https://scope.klaytn.com/tx/" + txHash;
           const message = `${ethers.utils.formatEther(
             value
@@ -45,11 +52,14 @@ async function main() {
           const telegramPromise = telegram(
             message
           )
-          await Promise.all([tweetPromise, telegramPromise]) 
+          const discordPromise = discord(
+            message
+          )
+          await Promise.all([tweetPromise, telegramPromise, discordPromise]) 
         }
       }
     } catch (e) {
-      winston.error(e);
+      winston.error('57',e);
     }
   });
 }
@@ -66,6 +76,7 @@ async function fetchWalletInfo(address) {
 }
 
 async function tweet(arg) {
+  winston.debug('74 tweet in');
   try {
     await userClient.v2.tweet(arg);
   } catch (e) {
@@ -73,10 +84,20 @@ async function tweet(arg) {
   }
 }
 async function telegram(arg) {
+  winston.debug('82 telegram in');
   try {
     await sendMessage(arg) 
   } catch (e) {
     console.error(e)
+  }
+}
+async function discord(arg) { //need to update
+  winston.debug("discord in")
+  try {
+    await sendDiscordMessage(arg);
+  } catch (e) {
+    winston.debug("discord e")
+    console.error(e);
   }
 }
 main()

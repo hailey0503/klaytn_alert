@@ -1,6 +1,6 @@
 FROM node:latest
 
-WORKDIR /repos/whaleAlert
+WORKDIR /repos/klaytnAlert
 
 COPY package.json ./
 
