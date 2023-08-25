@@ -24,15 +24,15 @@ async function main() {
       winston.debug('24',len);
 
       for (let i = 0; i < len; i++) {
-        winston.debug('27',i);
+        //winston.debug('27',i);
         const thisTx = transactions[i]; //provider.getTransaction
         //winston.debug('29',thisTx);
         const value = thisTx["value"];
         const txHash = thisTx["hash"];
         const whaleThreshold = ethers.utils.parseEther("10");
-        winston.debug('33',whaleThreshold);
+        //winston.debug('33',whaleThreshold);
         if (value.gte(whaleThreshold)) {
-          winston.debug('35 in')
+          //winston.debug('35 in')
           const fromAddress = thisTx["from"];
           const toAddress = thisTx["to"];
           winston.debug(fromAddress)
@@ -64,11 +64,16 @@ async function main() {
   });
 }
 
+
 async function fetchWalletInfo(address) {
-  const klaytnScope = "https://api-cypress-v3.scope.klaytn.com/v2/accounts/";
+  winston.debug('69 fetch in')
+  const klaytnScope = "https://api-cypress.klaytnscope.com/v2/accounts/";
   const res = await fetch(klaytnScope + address);
+  console.log('72',res)
   const resJson = await res.json();
+  console.log('74',resJson)
   const walletInfo = resJson.result;
+  console.log('76',walletInfo)
   const addressShort = address.slice(0, 7) + "..." + address.slice(37, 42);
   const walletName = walletInfo.addressName || addressShort;
   winston.debug("from_wallet_name: " + walletName);
