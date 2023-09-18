@@ -19,21 +19,37 @@ jobs:
       run: sudo docker rm -f klaytn_alert-container || true 
     - name: Generate Environment Variable File for production  
       run: |
-        echo "APP_KEY=$APP_KEY" >> .env.production
-        echo "APP_SECRET=$APP_SECRET" >> .env.production
-        echo "WSETHURL=$WSETHURL" >> .env.production
-        echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> .env.production
-        echo "ACCESS_SECRET=$ACCESS_SECRET" >> .env.production
-        echo "BEARER_TOKEN=$BEARER_TOKEN" >> .env.production
+        echo "DISCORD_WEBHOOK_URL=$DISCORD_WEBHOOK_URL" >> .env.production
+        echo "DISCORD_APP_ID=$DISCORD_APP_ID" >> .env.production
+        echo "DISCORD_PUBLIC_KEY=$DISCORD_PUBLIC_KEY" >> .env.production
         echo "DISCORD_URL=$DISCORD_URL" >> .env.production
         echo "DISCORD_TOKEN=$DISCORD_TOKEN" >> .env.production
+        echo "DISCORD_CHANNELID=$DISCORD_CHANNELID" >> .env.production
+
+        echo "wsUrl=$wsUrl" >> .env.production
+
+        echo "APP_KEY=$APP_KEY" >> .env.production
+        echo "APP_SECRET=$APP_SECRET" >> .env.production
+        echo "BEARER_TOKEN=$BEARER_TOKEN" >> .env.production
+        echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> .env.production
+        echo "ACCESS_SECRET=$ACCESS_SECRET" >> .env.production
+        echo "CLIENT_ID=$CLIENT_ID"  >> .env.production 
+        echo "CLIENT_SECRET=$CLIENT_SECRET"  >> .env.production
+        
         echo "TELEGRAM_TOKEN=$TELEGRAM_TOKEN" >> .env.production
         echo "NGROK_SEVER_URL=$NGROK_SEVER_URL" >> .env.production
+        echo "Threshold=$Threshold" >> .env.production
+        echo "Threshold_TEST=$Threshold_TEST" >> .env.production
       env:
+        wsUrl: ${{secrets.wsUrl}}
+
         DISCORD_WEBHOOK_URL: ${{secrets.DISCORD_WEBHOOK_URL}}
+        DISCORD_APP_ID: ${{secrets.DISCORD_APP_ID}}
+        DISCORD_PUBLIC_KEY: ${{secrets.DISCORD_PUBLIC_KEY}}
         DISCORD_URL: ${{secrets.DISCORD_URL}}
-        WSETHURL: ${{secrets.WSETHURL}}
-        WLDAPI: ${{secrets.WLDAPI}}
+        DISCORD_TOKEN: ${{secrets.DISCORD_TOKEN}}
+        DISCORD_CHANNELID : ${{secrets.DISCORD_CHANNELID}}
+
         APP_KEY: ${{secrets.APP_KEY}}
         APP_SECRET: ${{secrets.APP_SECRET}}
         BEARER_TOKEN: ${{secrets.BEARER_TOKEN}}
@@ -43,17 +59,21 @@ jobs:
         CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
         TELEGRAM_TOKEN: ${{secrets.TELEGRAM_TOKEN}}
         NGROK_SEVER_URL: ${{secrets.NGROK_SEVER_URL}}
-        DISCORD_APP_ID: ${{secrets.DISCORD_APP_ID}}
-        DISCORD_PUBLIC_KEY: ${{secrets.DISCORD_PUBLIC_KEY}}
-        DISCORD_TOKEN: ${{secrets.DISCORD_TOKEN}}
-        DISCORD_SERVERID: ${{secrets.DISCORD_SERVERID}}
-        PORT: ${{secrets.PORT}}
-        ngrokauth: ${{secrets.NGROKAUTH}}
+
+        Threshold: ${{secrets.Threshold}}
+        Threshold_TEST: ${{secrets.Threshold_TEST}}
+     
     - name: Run Docker Container
       env:
+        wsUrl: ${{secrets.wsUrl}}
+
         DISCORD_WEBHOOK_URL: ${{secrets.DISCORD_WEBHOOK_URL}}
-        wsETHUrl: ${{secrets.WSETHURL}}
-        WLDAPI: ${{secrets.WLDAPI}}
+        DISCORD_APP_ID: ${{secrets.DISCORD_APP_ID}}
+        DISCORD_PUBLIC_KEY: ${{secrets.DISCORD_PUBLIC_KEY}}
+        DISCORD_URL: ${{secrets.DISCORD_URL}}
+        DISCORD_TOKEN: ${{secrets.DISCORD_TOKEN}}
+        DISCORD_CHANNELID: ${{secrets.DISCORD_CHANNELID}}
+    
         APP_KEY: ${{secrets.APP_KEY}}
         APP_SECRET: ${{secrets.APP_SECRET}}
         BEARER_TOKEN: ${{secrets.BEARER_TOKEN}}
@@ -61,19 +81,13 @@ jobs:
         ACCESS_SECRET: ${{secrets.ACCESS_SECRET}}
         CLIENT_ID: ${{secrets.CLIENT_ID}} 
         CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
+
         TELEGRAM_TOKEN: ${{secrets.TELEGRAM_TOKEN}}
         NGROK_SEVER_URL: ${{secrets.NGROK_SEVER_URL}}
 
-        DISCORD_APP_ID: ${{secrets.DISCORD_APP_ID}}
-        DISCORD_PUBLIC_KEY: ${{secrets.DISCORD_PUBLIC_KEY}}
-        DISCORD_URL: ${{secrets.DISCORD_URL}}
+        Threshold: ${{secrets.Threshold}}
+        Threshold_TEST: ${{secrets.Threshold_TEST}}
+    
 
-        DISCORD_TOKEN: ${{secrets.DISCORD_TOKEN}}
-        DISCORD_SERVERID: ${{secrets.DISCORD_SERVERID}}
-
-
-
-        PORT: ${{secrets.PORT}}
-        ngrokauth: ${{secrets.NGROKAUTH}}
-      run: sudo docker run -d -p 8080:8080 --name klaytn_alert-container haileythegooner/klaytn_alert
+      run: sudo docker run --env-file ./.env.production -d -p 8080:8080 --name klaytn_alert-container haileythegooner/klaytn_alert
       

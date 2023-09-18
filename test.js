@@ -29,7 +29,7 @@ async function main() {
         //winston.debug('29',thisTx);
         const value = thisTx["value"];
         const txHash = thisTx["hash"];
-        const whaleThreshold = ethers.utils.parseEther("10000");
+        const whaleThreshold = ethers.utils.parseEther("10");
         //winston.debug('33',whaleThreshold);
         if (value.gte(whaleThreshold)) {
           //winston.debug('35 in')
