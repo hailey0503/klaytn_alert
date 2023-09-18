@@ -10,7 +10,7 @@ async function main() {
   const wsUrl = process.env.wsUrl;
   winston.warn(wsUrl);
   const networkId = 8217;
-
+  const threshold = process.env.Threshold
   const provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
   //winston.warn('14')
   // subscribe new block
@@ -29,7 +29,7 @@ async function main() {
         //winston.debug('29',thisTx);
         const value = thisTx["value"];
         const txHash = thisTx["hash"];
-        const whaleThreshold = ethers.utils.parseEther("10000");
+        const whaleThreshold = ethers.utils.parseEther(threshold);
         //winston.debug('33',whaleThreshold);
         if (value.gte(whaleThreshold)) {
           //winston.debug('35 in')

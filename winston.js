@@ -73,14 +73,14 @@ const logger = winston.createLogger({
     new winston.transports.File(options.file),
 	new winston.transports.Console(options.console),
 	new DiscordTransport({
-		webhook: process.env.discordWebhookURL,
+		webhook: process.env.DISCORD_WEBHOOK_URL,
 		defaultMeta: { service: 'my_kimchi_service' },
 		level: 'warn'
 	  })
   ],
   exitOnError: false, // do not exit on handled exceptions
 });
-
+/*
 logger.log({
 	level: 'error',
 	message: 'Error intializing service',
@@ -91,6 +91,7 @@ logger.log({
   });
   
 
+*/
 // create a stream object with a 'write' function that will be used by `morgan`
 logger.stream = {
 //  write: logger.info,

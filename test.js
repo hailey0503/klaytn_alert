@@ -10,7 +10,7 @@ async function main() {
   const wsUrl = process.env.wsUrl;
   winston.warn(wsUrl);
   const networkId = 8217;
-
+  const threashold_TEST = process.env.Threshold_TEST
   const provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
   //winston.warn('14')
   // subscribe new block
@@ -29,7 +29,7 @@ async function main() {
         //winston.debug('29',thisTx);
         const value = thisTx["value"];
         const txHash = thisTx["hash"];
-        const whaleThreshold = ethers.utils.parseEther("10");
+        const whaleThreshold = ethers.utils.parseEther(threashold_TEST);
         //winston.debug('33',whaleThreshold);
         if (value.gte(whaleThreshold)) {
           //winston.debug('35 in')
@@ -69,11 +69,11 @@ async function fetchWalletInfo(address) {
   winston.debug('69 fetch in')
   const klaytnScope = "https://api-cypress.klaytnscope.com/v2/accounts/";
   const res = await fetch(klaytnScope + address);
-  console.log('72',res)
+  //console.log('72',res)
   const resJson = await res.json();
-  console.log('74',resJson)
+  //console.log('74',resJson)
   const walletInfo = resJson.result;
-  console.log('76',walletInfo)
+  //console.log('76',walletInfo)
   const addressShort = address.slice(0, 7) + "..." + address.slice(37, 42);
   const walletName = walletInfo.addressName || addressShort;
   winston.debug("from_wallet_name: " + walletName);
