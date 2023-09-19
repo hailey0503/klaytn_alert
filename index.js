@@ -4,9 +4,22 @@ const winston = require("./winston.js");
 const { userClient } = require("./twitterClient.js");
 const { sendMessage } = require("./telegram.js")
 const { discordClient, sendDiscordMessage } = require("./discord.js");
+const { MongoClient } = require('mongodb');
 
+const uri = process.env.DB_URL; // Replace with your MongoDB URI
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+
+async function connectToMongoDB() {
+  try {
+    await client.connect();
+    console.log('Connected to MongoDB');
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
+  }
+}
 
 async function main() {
+  connectToMongoDB();
   const wsUrl = process.env.wsUrl;
   winston.warn(wsUrl);
   const networkId = 8217;
@@ -46,6 +59,22 @@ async function main() {
             value
           )} #Klay is transfered to ${walletToName} from ${walletFromName} ${link}`
           
+          const blockchainData = {
+            blockchainName: 'Klaytn',
+            timestamp: new Date(),
+            txHash: txHash,
+            fee: 0.01,
+            sender: walletFromName,
+            receiver: walletToName,
+            amount: ethers.utils.formatEther(
+              value
+            ),
+          };
+          
+          const db_result = insertBlockchainData(blockchainData); //why {}??
+          print(db_result)
+          
+
           const tweetPromise = tweet(
             message
           );
@@ -64,7 +93,6 @@ async function main() {
   });
 }
 
-
 async function fetchWalletInfo(address) {
   winston.debug('69 fetch in')
   const klaytnScope = "https://api-cypress.klaytnscope.com/v2/accounts/";
@@ -79,6 +107,21 @@ async function fetchWalletInfo(address) {
   winston.debug("from_wallet_name: " + walletName);
   return walletName;
 }
+
+async function insertBlockchainData(data) {
+  const db = client.db('kimchi'); // Replace with your database name
+  const collection = db.collection('transactions'); // Replace with your collection name
+  const resultID = ""
+  try {
+    const result = await collection.insertOne(data);
+    resultID = result.insertedId
+    console.log('Inserted blockchain data with ID:', result.insertedId);
+  } catch (error) {
+    console.error('Error inserting blockchain data:', error);
+  }
+  return resultID
+}
+
 
 async function tweet(arg) {
   winston.debug('74 tweet in');

@@ -40,6 +40,8 @@ jobs:
         echo "NGROK_SEVER_URL=$NGROK_SEVER_URL" >> .env.production
         echo "Threshold=$Threshold" >> .env.production
         echo "Threshold_TEST=$Threshold_TEST" >> .env.production
+
+        echo "DB_URL" >> .env.production
       env:
         wsUrl: ${{secrets.wsUrl}}
 
@@ -62,6 +64,8 @@ jobs:
 
         Threshold: ${{secrets.Threshold}}
         Threshold_TEST: ${{secrets.Threshold_TEST}}
+
+        DB_URL: ${{secrets.DB_URL}}
      
     - name: Run Docker Container
       env:
@@ -87,6 +91,8 @@ jobs:
 
         Threshold: ${{secrets.Threshold}}
         Threshold_TEST: ${{secrets.Threshold_TEST}}
+
+        DB_URL: ${{secrets.DB_URL}}
     
 
       run: sudo docker run --env-file ./.env.production -d -p 8080:8080 --name klaytn_alert-container haileythegooner/klaytn_alert
