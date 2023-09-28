@@ -1,4 +1,4 @@
-FROM arm64v8/node:18
+FROM node:latest
 
 WORKDIR /repos/klaytnAlert
 
