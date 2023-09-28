@@ -41,7 +41,7 @@ jobs:
         echo "Threshold=$Threshold" >> .env.production
         echo "Threshold_TEST=$Threshold_TEST" >> .env.production
 
-        echo "DB_URL" >> .env.production
+        echo "DB_URL=$DB_URL" >> .env.production
       env:
         wsUrl: ${{secrets.wsUrl}}
 
