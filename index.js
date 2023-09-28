@@ -35,15 +35,16 @@ async function main() {
       var len = transactions.length;
 
       winston.debug('24',len);
+      console.log('thres', threshold)
 
       for (let i = 0; i < len; i++) {
-        //winston.debug('27',i);
+        winston.debug('27',i);
         const thisTx = transactions[i]; //provider.getTransaction
-        //winston.debug('29',thisTx);
+        winston.debug('29',thisTx);
         const value = thisTx["value"];
         const txHash = thisTx["hash"];
         const whaleThreshold = ethers.utils.parseEther(threshold);
-        //winston.debug('33',whaleThreshold);
+        winston.debug('33',whaleThreshold);
         if (value.gte(whaleThreshold)) {
           //winston.debug('35 in')
           const fromAddress = thisTx["from"];
