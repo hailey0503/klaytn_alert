@@ -25,6 +25,7 @@ async function main() {
   const networkId = 8217;
   const threshold = process.env.Threshold
   const provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
+  const network_id_pair = {networkId: "Klaytn"}
   //winston.warn('14')
   // subscribe new block
   provider.on("block", async (block) => {
@@ -34,17 +35,15 @@ async function main() {
 
       var len = transactions.length;
 
-      winston.debug('24',len);
-      console.log('thres', threshold)
-
+      //winston.debug('24',len);
+     
       for (let i = 0; i < len; i++) {
-        winston.debug('27',i);
         const thisTx = transactions[i]; //provider.getTransaction
-        winston.debug('29',thisTx);
+       // winston.debug('this transaction',thisTx);
         const value = thisTx["value"];
         const txHash = thisTx["hash"];
         const whaleThreshold = ethers.utils.parseEther(threshold);
-        winston.debug('33',whaleThreshold);
+        //winston.debug('33',whaleThreshold);
         if (value.gte(whaleThreshold)) {
           //winston.debug('35 in')
           const fromAddress = thisTx["from"];
@@ -58,22 +57,26 @@ async function main() {
           const link = "https://scope.klaytn.com/tx/" + txHash;
           const message = `${ethers.utils.formatEther(
             value
-          )} #Klay is transfered to ${walletToName} from ${walletFromName} ${link}`
+          )} #Klay is transfered to ${walletToName} from ${walletFromName} ${link}` //kimchi.io/tx/txHash
           
           const blockchainData = {
-            blockchainName: 'Klaytn',
+            blockchainName: network_id_pair.networkId,
             timestamp: new Date(),
             txHash: txHash,
-            fee: 0.01,
             sender: walletFromName,
+            sender_full: fromAddress,
             receiver: walletToName,
+            receiver_full: toAddress,
             amount: ethers.utils.formatEther(
               value
             ),
+            fee: thisTx.gasPrice.hex,
+            link: link,
+
           };
           
           const db_result = insertBlockchainData(blockchainData); //why {}??
-          print(db_result)
+          console.log("db_result",db_result)
           
 
           const tweetPromise = tweet(
@@ -98,11 +101,9 @@ async function fetchWalletInfo(address) {
   winston.debug('69 fetch in')
   const klaytnScope = "https://api-cypress.klaytnscope.com/v2/accounts/";
   const res = await fetch(klaytnScope + address);
-  console.log('72',res)
   const resJson = await res.json();
-  console.log('74',resJson)
-  const walletInfo = resJson.result;
-  console.log('76',walletInfo)
+  const walletInfo =  resJson.result
+  console.log('107',walletInfo)
   const addressShort = address.slice(0, 7) + "..." + address.slice(37, 42);
   const walletName = walletInfo.addressName || addressShort;
   winston.debug("from_wallet_name: " + walletName);
@@ -112,15 +113,14 @@ async function fetchWalletInfo(address) {
 async function insertBlockchainData(data) {
   const db = client.db('kimchi'); // Replace with your database name
   const collection = db.collection('transactions'); // Replace with your collection name
-  const resultID = ""
   try {
     const result = await collection.insertOne(data);
-    resultID = result.insertedId
-    console.log('Inserted blockchain data with ID:', result.insertedId);
+    //resultID = result.insertedId
+    console.log("db_result_id(119)", result)
+    return result
   } catch (error) {
     console.error('Error inserting blockchain data:', error);
   }
-  return resultID
 }
 
 

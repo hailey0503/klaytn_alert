@@ -15,11 +15,13 @@ const transaction = new Schema({
 		type: String,
 		required: true
 	},
-	fee: {
-		type: Number,
+
+	sender: {
+		type: String,
 		required: true
 	},
-	sender: {
+
+	sender_full: {
 		type: String,
 		required: true
 	},
@@ -28,10 +30,24 @@ const transaction = new Schema({
 		type: String,
 		required: true
 	},
+	receiver_full: {
+		type: String,
+		required: true
+	},
+
 	amount: {
 		type: String,
 		required: true
 	},
+
+	fee: {
+		type: Number,
+		required: true
+	},
+	link: {
+		type: String,
+		required: true
+	}
 	
 });
 
