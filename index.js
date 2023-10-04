@@ -46,6 +46,8 @@ async function main() {
         //winston.debug('33',whaleThreshold);
         if (value.gte(whaleThreshold)) {
           //winston.debug('35 in')
+          const receipt = await thisTx.wait()
+          console.log("gas??",receipt)
           const fromAddress = thisTx["from"];
           const toAddress = thisTx["to"];
           winston.debug(fromAddress)
@@ -58,7 +60,17 @@ async function main() {
           const message = `${ethers.utils.formatEther(
             value
           )} #Klay is transfered to ${walletToName} from ${walletFromName} ${link}` //kimchi.io/tx/txHash
-          
+          const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex)
+          console.log("gasPrice",gasPrice)
+          //console.log("test", ethers.utils.parseEther(thisTx["gasPrice"]._hex))
+          const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex)
+          console.log('USED', gasUsed)
+          const gasFee = (gasUsed * gasPrice) * 10**18 ////how to make gasFee * 10^18?? in better way??
+          console.log('gasFee', gasFee)
+          console.log('Value', value)
+          console.log("gasFeeString", gasFee.toString())
+          const gasFeeToString = gasFee.toString()
+          //console.log('DEC', ethers.utils.parseEther(gasFeeToWei)) //how to make gasFee * 10^18??
           const blockchainData = {
             blockchainName: network_id_pair.networkId,
             timestamp: new Date(),
@@ -70,8 +82,8 @@ async function main() {
             amount: ethers.utils.formatEther(
               value
             ),
-            fee: thisTx.gasPrice.hex,
-            link: link,
+            fee: gasFeeToString,
+            link: "https://scope.klaytn.com/tx/",
 
           };
           
