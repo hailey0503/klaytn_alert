@@ -42,6 +42,7 @@ jobs:
         echo "Threshold_TEST=$Threshold_TEST" >> .env.production
 
         echo "DB_URL=$DB_URL" >> .env.production
+        echo "COINMARKETCAP=$COINMARKETCAP" >> .env.production
       env:
         wsUrl: ${{secrets.wsUrl}}
 
@@ -66,6 +67,7 @@ jobs:
         Threshold_TEST: ${{secrets.Threshold_TEST}}
 
         DB_URL: ${{secrets.DB_URL}}
+        COINMARKETCAP: ${{secrets.COINMARKETCAP}}
      
     - name: Run Docker Container
       env:
@@ -93,6 +95,7 @@ jobs:
         Threshold_TEST: ${{secrets.Threshold_TEST}}
 
         DB_URL: ${{secrets.DB_URL}}
+        COINMARKETCAP: ${{secrets.COINMARKETCAP}}
     
 
       run: sudo docker run --env-file ./.env.production -d -p 8080:8080 --name klaytn_alert-container haileythegooner/klaytn_alert
