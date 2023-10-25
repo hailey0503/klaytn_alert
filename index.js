@@ -63,9 +63,10 @@ async function main() {
           const walletToName = await fetchWalletInfo(toAddress);
           winston.debug("43", walletToName);
           const link = "https://kimchi-web.vercel.app/tx/" + txHash;
-          const message = `🐋 ${ Number(ethers.utils.formatEther(
+
+          const message = `🐋 ${Number(ethers.utils.formatEther(
             value
-          )).toFixed(0).toLocaleString("en-US")} #Klay is transfered to ${walletToName} from ${walletFromName} ${link}`; //kimchi.io/tx/txHash
+          )).toLocaleString("en-US", { maximumFractionDigits: 0 })} #Klay is transfered to ${walletToName} from ${walletFromName} ${link}`; //kimchi.io/tx/txHash
           const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
           console.log("gasPrice", gasPrice);
           //console.log("test", ethers.utils.parseEther(thisTx["gasPrice"]._hex))
