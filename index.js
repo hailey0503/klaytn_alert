@@ -63,9 +63,9 @@ async function main() {
           const walletToName = await fetchWalletInfo(toAddress);
           winston.debug("43", walletToName);
           const link = "https://scope.klaytn.com/tx/" + txHash;
-          const message = `${ethers.utils.formatEther(
+          const message = `${ Number(ethers.utils.formatEther(
             value
-          )} #Klay is transfered to ${walletToName} from ${walletFromName} ${link}`; //kimchi.io/tx/txHash
+          )).toFixed(0).toLocaleString("en-US")} #Klay is transfered to ${walletToName} from ${walletFromName} ${link}`; //kimchi.io/tx/txHash
           const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
           console.log("gasPrice", gasPrice);
           //console.log("test", ethers.utils.parseEther(thisTx["gasPrice"]._hex))
@@ -73,7 +73,8 @@ async function main() {
           console.log("USED", gasUsed);
           const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
           console.log("gasFee", gasFee);
-          console.log("Value", value);
+          console.log("Value", value, typeof(value));
+          //const klaytnValue = Math.round(value * 1e4) / 1e4;
           console.log("gasFeeString", gasFee.toString());
           const gasFeeToString = gasFee.toString();
           //console.log('DEC', ethers.utils.parseEther(gasFeeToWei)) //how to make gasFee * 10^18??
@@ -85,7 +86,7 @@ async function main() {
             sender_full: fromAddress,
             receiver: walletToName,
             receiver_full: toAddress,
-            amount: ethers.utils.formatEther(value),
+            amount:  ethers.utils.formatEther(value),
             fee: gasFeeToString,
             link: "https://scope.klaytn.com/tx/",
           };
