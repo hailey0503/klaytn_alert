@@ -63,13 +63,17 @@ async function main() {
           const walletToName = await fetchWalletInfo(toAddress);
           winston.debug("43", walletToName);
           const link = "https://kimchi-web.vercel.app/tx/" + txHash;
-
-          const message = `🐋 ${Number(ethers.utils.formatEther(
+          const price = await getPrice(); //current price!! 
+          const klay_amount = Number(ethers.utils.formatEther(
             value
-          )).toLocaleString("en-US", { maximumFractionDigits: 0 })} #Klay is transfered to ${walletToName} from ${walletFromName} ${link}`; //kimchi.io/tx/txHash
+          ))
+          const d_value = price * klay_amount
+          const message = `🐋 ${klay_amount.toLocaleString("en-US", { maximumFractionDigits: 0 })} ($${d_value.toFixed(1)}) #Klay is transfered to ${walletToName} from ${walletFromName} ${link}`; //kimchi.io/tx/txHash
           const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
           console.log("gasPrice", gasPrice);
-          //console.log("test", ethers.utils.parseEther(thisTx["gasPrice"]._hex))
+          console.log("price", price)
+          console.log("klay_amount", klay_amount)
+          console.log("message", message)
           const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
           console.log("USED", gasUsed);
           const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
@@ -102,7 +106,7 @@ async function main() {
         }
       }
     } catch (e) {
-      winston.error("57", e);
+      winston.error("109 winston error", e);
     }
   });
 }
@@ -131,6 +135,24 @@ async function insertBlockchainData(data) {
   } catch (error) {
     console.error("Error inserting blockchain data:", error);
   }
+}
+
+async function getPrice() {
+  const coinmarketcap = "https://kimchi-web.vercel.app/api/coinmarketcap";
+  let priceData = 0
+  await fetch(coinmarketcap).then(function(response) {
+    // The response is a Response instance.
+    // You parse the data into a useable format using `.json()`
+    return response.json();
+  }).then(function(data) {
+    // `data` is the parsed version of the JSON returned from the above endpoint.
+    console.log(data);  // { "userId": 1, "id": 1, "title": "...", "body": "..." }
+    priceData = data
+    
+  });
+  console.log('151',priceData)
+  return priceData.currentPriceUSD
+ 
 }
 
 async function tweet(arg) {
