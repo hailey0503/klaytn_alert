@@ -68,7 +68,7 @@ async function main() {
             value
           ))
           const d_value = price * klay_amount
-          const message = `🐋 ${klay_amount.toLocaleString("en-US", { maximumFractionDigits: 0 })} ($${d_value.toFixed(1)}) #Klay is transfered to ${walletToName} from ${walletFromName} ${link}`; //kimchi.io/tx/txHash
+          const message = `🐋 ${klay_amount.toLocaleString("en-US", { maximumFractionDigits: 0 })} #Klay (${d_value.toLocaleString("en-US", { maximumFractionDigits: 0 })} USD) is transfered to ${walletToName} from ${walletFromName} ${link}`; //kimchi.io/tx/txHash
           const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
           console.log("gasPrice", gasPrice);
           console.log("price", price)
@@ -82,7 +82,6 @@ async function main() {
           //const klaytnValue = Math.round(value * 1e4) / 1e4;
           console.log("gasFeeString", gasFee.toString());
           const gasFeeToString = gasFee.toString();
-          //console.log('DEC', ethers.utils.parseEther(gasFeeToWei)) //how to make gasFee * 10^18??
           const blockchainData = {
             blockchainName: network_id_pair.networkId,
             timestamp: new Date(),
