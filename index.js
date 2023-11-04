@@ -41,11 +41,8 @@ async function main() {
 
       var len = transactions.length;
 
-      //winston.debug('24',len);
-
       for (let i = 0; i < len; i++) {
         const thisTx = transactions[i]; //provider.getTransaction
-        // winston.debug('this transaction',thisTx);
         const value = thisTx["value"];
         const txHash = thisTx["hash"];
         const whaleThreshold = ethers.utils.parseEther(threshold);
@@ -79,7 +76,6 @@ async function main() {
           const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
           console.log("gasFee", gasFee);
           console.log("Value", value, typeof(value));
-          //const klaytnValue = Math.round(value * 1e4) / 1e4;
           console.log("gasFeeString", gasFee.toString());
           const gasFeeToString = gasFee.toString();
           const blockchainData = {
@@ -171,7 +167,6 @@ async function telegram(arg) {
   }
 }
 async function discord(arg) {
-  //need to update
   winston.debug("discord in");
   try {
     await sendDiscordMessage(arg);
