@@ -54,7 +54,7 @@ async function klaytnAlert() {
         const txHash = thisTx["hash"];
         const whaleThreshold = ethers.utils.parseEther(threshold);
         //winston.debug('33',whaleThreshold);
-        winston.warn('57',whaleThreshold);
+        //winston.warn('57',whaleThreshold);
         if (value.gte(whaleThreshold)) {
           //winston.debug('35 in')
           const receipt = await thisTx.wait();
