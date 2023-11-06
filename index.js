@@ -68,7 +68,7 @@ async function klaytnAlert() {
           const price = await getPrice("KLAY"); //current price!! 
           const klay_amount = Number(ethers.utils.formatEther(value))
           console.log('70',klay_amount)
-          const d_value_bigN = ethers.BigNumber.from(value).mul(price* 10 ** 10).div(10 ** 10)
+          const d_value_bigN = ethers.BigNumber.from(value).mul(price * 10 ** 10).div(10 ** 10)
           const d_value = Number(ethers.utils.formatEther(d_value_bigN))
           console.log('73',d_value)
           const message = `🐋 ${klay_amount.toLocaleString("en-US", { maximumFractionDigits: 0 })} #Klay (${d_value.toLocaleString("en-US", { maximumFractionDigits: 0})} USD) is transfered to ${walletToName} from ${walletFromName} ${link}`; //kimchi.io/tx/txHash
