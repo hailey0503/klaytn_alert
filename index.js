@@ -158,9 +158,9 @@ async function wemixAlert() {
           const transfer_amount = Number(ethers.utils.formatEther(value))
           console.log('159',transfer_amount)
           const d_value_bigN = ethers.BigNumber.from(value).mul(price* 10 ** 10).div(10 ** 10)
+          console.log('161',d_value_bigN)
           const d_value = Number(ethers.utils.formatEther(d_value_bigN))
-          console.log('162',d_value)
-
+          console.log('163',d_value)
           const message = `🐋 ${transfer_amount.toLocaleString("en-US", { maximumFractionDigits: 0 })} #Wemix (${d_value.toLocaleString("en-US", { maximumFractionDigits: 0})} USD) is transfered to ${sender} from ${receiver} ${link}`; //kimchi.io/tx/txHash
           const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
           console.log("gasPrice", gasPrice);
@@ -220,7 +220,6 @@ async function insertBlockchainData(data, symbol) {
   const collection = db.collection(symbol); // Replace with your collection name
   try {
     const result = await collection.insertOne(data);
-    //resultID = result.insertedId
     console.log("db_result_id(119)", result);
     return result;
   } catch (error) {
