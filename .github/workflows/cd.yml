@@ -28,7 +28,8 @@ jobs:
         echo "DISCORD_TOKEN=$DISCORD_TOKEN" >> .env.production
         echo "DISCORD_CHANNELID=$DISCORD_CHANNELID" >> .env.production
 
-        echo "wsUrl=$wsUrl" >> .env.production
+        echo "wsUrl_klaytn=$wsUrl_klaytn" >> .env.production
+        echo "wsUrl_wemix=$wsUrl_wemix" >> .env.production
 
         echo "APP_KEY=$APP_KEY" >> .env.production
         echo "APP_SECRET=$APP_SECRET" >> .env.production
@@ -46,7 +47,8 @@ jobs:
         echo "DB_URL=$DB_URL" >> .env.production
         echo "COINMARKETCAP=$COINMARKETCAP" >> .env.production
       env:
-        wsUrl: ${{secrets.wsUrl}}
+        wsUrl_klaytn: ${{secrets.wsUrl_klaytn}}
+        wsUrl_wemix: ${{secrets.wsUrl_wemix}}
 
         DISCORD_WEBHOOK_URL: ${{secrets.DISCORD_WEBHOOK_URL}}
         DISCORD_APP_ID: ${{secrets.DISCORD_APP_ID}}
@@ -65,7 +67,8 @@ jobs:
         TELEGRAM_TOKEN: ${{secrets.TELEGRAM_TOKEN}}
         NGROK_SEVER_URL: ${{secrets.NGROK_SEVER_URL}}
 
-        Threshold: ${{secrets.Threshold}}
+        Threshold_KLAY: ${{secrets.Threshold_KLAY}}
+        Threshold_WEMIX: ${{secrets.Threshold_WEMIX}}
         Threshold_TEST: ${{secrets.Threshold_TEST}}
 
         DB_URL: ${{secrets.DB_URL}}
@@ -73,7 +76,8 @@ jobs:
      
     - name: Run Docker Container
       env:
-        wsUrl: ${{secrets.wsUrl}}
+        wsUrl_klaytn: ${{secrets.wsUrl_klaytn}}
+        wsUrl_wemix: ${{secrets.wsUrl_wemix}}
 
         DISCORD_WEBHOOK_URL: ${{secrets.DISCORD_WEBHOOK_URL}}
         DISCORD_APP_ID: ${{secrets.DISCORD_APP_ID}}
@@ -93,8 +97,8 @@ jobs:
         TELEGRAM_TOKEN: ${{secrets.TELEGRAM_TOKEN}}
         NGROK_SEVER_URL: ${{secrets.NGROK_SEVER_URL}}
 
-        Threshold: ${{secrets.Threshold}}
-        Threshold_TEST: ${{secrets.Threshold_TEST}}
+        Threshold_KLAY: ${{secrets.Threshold_KLAY}}
+        Threshold_WEMIX: ${{secrets.Threshold_WEMIX}}
 
         DB_URL: ${{secrets.DB_URL}}
         COINMARKETCAP: ${{secrets.COINMARKETCAP}}

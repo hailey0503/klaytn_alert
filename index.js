@@ -26,10 +26,15 @@ async function connectToMongoDB() {
 async function main() {
   connectToMongoDB();
   // Initial fetch when the server starts
-  const wsUrl = process.env.wsUrl;
+  klaytnAlert() 
+  wemixAlert()
+}
+
+async function klaytnAlert() {
+  const wsUrl = process.env.wsUrl_klaytn;
   winston.warn(wsUrl);
   const networkId = 8217;
-  const threshold = process.env.Threshold;
+  const threshold = process.env.Threshold_KLAY;
   const provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
   const network_id_pair = { networkId: "Klaytn" };
   //winston.warn('14')
@@ -60,7 +65,7 @@ async function main() {
           const walletToName = await fetchWalletInfo(toAddress);
           winston.debug("43", walletToName);
           const link = "https://kimchi-web.vercel.app/tx/" + txHash;
-          const price = await getPrice(); //current price!! 
+          const price = await getPrice("KLAY"); //current price!! 
           const klay_amount = Number(ethers.utils.formatEther(
             value
           ))
@@ -88,10 +93,97 @@ async function main() {
             receiver_full: toAddress,
             amount:  ethers.utils.formatEther(value),
             fee: gasFeeToString,
-            link: "https://scope.klaytn.com/tx/",
+            link: `https://scope.klaytn.com/tx/`,
           };
 
-          const db_result = insertBlockchainData(blockchainData); //why {}??
+          const db_result = insertBlockchainData(blockchainData, "transactions"); 
+          console.log("db_result", db_result);
+
+          const tweetPromise = tweet(message);
+          const telegramPromise = telegram(message);
+          const discordPromise = discord(message);
+          await Promise.all([tweetPromise, telegramPromise, discordPromise]);
+        }
+      }
+    } catch (e) {
+      winston.error("109 winston error", e);
+    }
+  });
+}
+
+async function wemixAlert() {
+  const wsUrl = process.env.wsUrl_wemix;
+  winston.warn(wsUrl);
+  const networkId = 1111;
+  const threshold = process.env.Threshold_WEMIX;
+  const provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
+  const coinName = "WeMix"
+  const network_id_pair = { networkId: coinName };
+  //winston.warn('14')
+  // subscribe new block
+  provider.on("block", async (block) => {
+    try {
+      const result = await provider.getBlockWithTransactions(block);
+      const transactions = result.transactions;
+
+      var len = transactions.length;
+
+      for (let i = 0; i < len; i++) {
+        const thisTx = transactions[i]; //provider.getTransaction
+        const value = thisTx["value"];
+        const txHash = thisTx["hash"];
+        const whaleThreshold = ethers.utils.parseEther(threshold);
+        //winston.debug('33',whaleThreshold);
+        //console.log("wemix thisTx",thisTx)
+        if (value.gte(whaleThreshold)) {
+          winston.debug('35 in')
+          const receipt = await thisTx.wait();
+          // console.log("gas??",receipt)
+          const fromAddress = thisTx["from"];
+          const toAddress = thisTx["to"];
+          winston.debug(fromAddress);
+          winston.debug(toAddress);
+
+          const sender = fromAddress.slice(0, 7) + "..." + fromAddress.slice(37, 42);
+          const receiver = toAddress.slice(0, 7) + "..." + toAddress.slice(37, 42);
+         
+          //const walletFromName = await fetchWalletInfo(fromAddress);
+          //winston.debug("41", walletFromName);
+          //const walletToName = await fetchWalletInfo(toAddress);
+          //winston.debug("43", walletToName);
+          const link = "https://kimchi-web.vercel.app/tx/" + txHash;
+          const price = await getPrice(coinName.toUpperCase()); //current price!! 
+          const transfer_amount = Number(ethers.utils.formatEther(
+            value
+          ))
+          const d_value = price * transfer_amount
+          const message = `🐋 ${transfer_amount.toLocaleString("en-US", { maximumFractionDigits: 0 })} #Wemix (${d_value.toLocaleString("en-US", { maximumFractionDigits: 0})} USD) is transfered to ${sender} from ${receiver} ${link}`; //kimchi.io/tx/txHash
+          const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
+          console.log("gasPrice", gasPrice);
+          console.log("price", price)
+          console.log("wemix transfer_amount", transfer_amount)
+          console.log("message", message)
+          const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
+          console.log("USED", gasUsed);
+          const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
+          console.log("gasFee", gasFee);
+          console.log("Value", value, typeof(value));
+          console.log("gasFeeString", gasFee.toString());
+          const gasFeeToString = gasFee.toString();
+          const blockchainData = {
+            blockchainName: network_id_pair.networkId,
+            timestamp: new Date(),
+            txHash: txHash,
+            sender: sender,
+            sender_full: fromAddress,
+            receiver: receiver,
+            receiver_full: toAddress,
+            amount:  ethers.utils.formatEther(value),
+            fee: gasFeeToString,
+            link: `https://explorer.wemix.com/tx/`,
+          };
+
+          const db_result = insertBlockchainData(blockchainData, "wemix"); //why {}??
           console.log("db_result", db_result);
 
           const tweetPromise = tweet(message);
@@ -119,9 +211,9 @@ async function fetchWalletInfo(address) {
   return walletName;
 }
 
-async function insertBlockchainData(data) {
+async function insertBlockchainData(data, symbol) {
   const db = client.db("kimchi"); // Replace with your database name
-  const collection = db.collection("transactions"); // Replace with your collection name
+  const collection = db.collection(symbol); // Replace with your collection name
   try {
     const result = await collection.insertOne(data);
     //resultID = result.insertedId
@@ -132,22 +224,33 @@ async function insertBlockchainData(data) {
   }
 }
 
-async function getPrice() {
+async function getPrice(coinName) {
   const coinmarketcap = "https://kimchi-web.vercel.app/api/coinmarketcap";
-  let priceData = 0
-  await fetch(coinmarketcap).then(function(response) {
-    // The response is a Response instance.
-    // You parse the data into a useable format using `.json()`
-    return response.json();
-  }).then(function(data) {
-    // `data` is the parsed version of the JSON returned from the above endpoint.
-    console.log(data);  // { "userId": 1, "id": 1, "title": "...", "body": "..." }
-    priceData = data
+  try {
+    const response = await fetch(coinmarketcap);
     
-  });
-  console.log('151',priceData)
-  return priceData.currentPriceUSD
- 
+    if (response.ok) {
+      const data = await response.json();
+      console.log("230 data", data);
+      if (data && Object.keys(data).length > 1) {
+        // Log all keys in the data object to verify the content
+        console.log("All keys in data:", Object.keys(data));
+      } else {
+        throw new Error("Empty or invalid data received from the API.");
+      }
+      // Check if the coinName exists in the data object
+      if (data.hasOwnProperty(coinName)) {
+        return data[coinName].currentPriceUSD;
+      } else {
+        throw new Error(`Coin data for '${coinName}' not found.`);
+      }
+    } else {
+      throw new Error("Failed to fetch data from the API.");
+    }
+  } catch (error) {
+    console.error("Error:", error.message);
+    return null; // Return null or handle the error as required
+  }
 }
 
 async function tweet(arg) {
@@ -160,8 +263,10 @@ async function tweet(arg) {
 }
 async function telegram(arg) {
   winston.debug("82 telegram in");
+  console.log("163 telegram in")
   try {
     await sendMessage(arg);
+    console.log("telegram sent")
   } catch (e) {
     console.error(e);
   }
