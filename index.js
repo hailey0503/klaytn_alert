@@ -66,10 +66,11 @@ async function klaytnAlert() {
           winston.debug("43", walletToName);
           const link = "https://kimchi-web.vercel.app/tx/" + txHash;
           const price = await getPrice("KLAY"); //current price!! 
-          const klay_amount = Number(ethers.utils.formatEther(
-            value
-          ))
-          const d_value = price * klay_amount
+          const klay_amount = Number(ethers.utils.formatEther(value))
+          console.log('70',klay_amount)
+          const d_value_bigN = ethers.BigNumber.from(value).mul(price* 10 ** 10).div(10 ** 10)
+          const d_value = Number(ethers.utils.formatEther(d_value_bigN))
+          console.log('73',d_value)
           const message = `🐋 ${klay_amount.toLocaleString("en-US", { maximumFractionDigits: 0 })} #Klay (${d_value.toLocaleString("en-US", { maximumFractionDigits: 0})} USD) is transfered to ${walletToName} from ${walletFromName} ${link}`; //kimchi.io/tx/txHash
           const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
           console.log("gasPrice", gasPrice);
@@ -153,10 +154,13 @@ async function wemixAlert() {
           //winston.debug("43", walletToName);
           const link = "https://kimchi-web.vercel.app/tx/" + txHash;
           const price = await getPrice(coinName.toUpperCase()); //current price!! 
-          const transfer_amount = Number(ethers.utils.formatEther(
-            value
-          ))
-          const d_value = price * transfer_amount
+
+          const transfer_amount = Number(ethers.utils.formatEther(value))
+          console.log('159',transfer_amount)
+          const d_value_bigN = ethers.BigNumber.from(value).mul(price* 10 ** 10).div(10 ** 10)
+          const d_value = Number(ethers.utils.formatEther(d_value_bigN))
+          console.log('162',d_value)
+
           const message = `🐋 ${transfer_amount.toLocaleString("en-US", { maximumFractionDigits: 0 })} #Wemix (${d_value.toLocaleString("en-US", { maximumFractionDigits: 0})} USD) is transfered to ${sender} from ${receiver} ${link}`; //kimchi.io/tx/txHash
           const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
           console.log("gasPrice", gasPrice);
@@ -240,7 +244,7 @@ async function getPrice(coinName) {
       }
       // Check if the coinName exists in the data object
       if (data.hasOwnProperty(coinName)) {
-        return data[coinName].currentPriceUSD;
+        return data[coinName].currentPriceUSD.toFixed(10);
       } else {
         throw new Error(`Coin data for '${coinName}' not found.`);
       }
