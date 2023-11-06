@@ -31,6 +31,9 @@ jobs:
         echo "wsUrl_klaytn=$wsUrl_klaytn" >> .env.production
         echo "wsUrl_wemix=$wsUrl_wemix" >> .env.production
 
+        echo "Threshold_KLAY=$Threshold_KLAY" >> .env.production
+        echo "Threshold_WEMIX=$Threshold_WEMIX" >> .env.production
+        
         echo "APP_KEY=$APP_KEY" >> .env.production
         echo "APP_SECRET=$APP_SECRET" >> .env.production
         echo "BEARER_TOKEN=$BEARER_TOKEN" >> .env.production
