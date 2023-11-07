@@ -33,7 +33,8 @@ jobs:
 
         echo "Threshold_KLAY=$Threshold_KLAY" >> .env.production
         echo "Threshold_WEMIX=$Threshold_WEMIX" >> .env.production
-        
+        echo "Threshold_MBX=$Threshold_MBX" >> .env.production
+
         echo "APP_KEY=$APP_KEY" >> .env.production
         echo "APP_SECRET=$APP_SECRET" >> .env.production
         echo "BEARER_TOKEN=$BEARER_TOKEN" >> .env.production
@@ -72,6 +73,7 @@ jobs:
 
         Threshold_KLAY: ${{secrets.Threshold_KLAY}}
         Threshold_WEMIX: ${{secrets.Threshold_WEMIX}}
+        Threshold_MBX: ${{secrets.Threshold_MBX}}
         Threshold_TEST: ${{secrets.Threshold_TEST}}
 
         DB_URL: ${{secrets.DB_URL}}
@@ -102,6 +104,7 @@ jobs:
 
         Threshold_KLAY: ${{secrets.Threshold_KLAY}}
         Threshold_WEMIX: ${{secrets.Threshold_WEMIX}}
+        Threshold_MBX: ${{secrets.Threshold_MBX}}
 
         DB_URL: ${{secrets.DB_URL}}
         COINMARKETCAP: ${{secrets.COINMARKETCAP}}
