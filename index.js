@@ -26,7 +26,7 @@ async function main() {
   // Initial fetch when the server starts
   klaytnAlert();
   wemixAlert();
-  //mbxAlert()
+  mbxAlert()
 }
 
 async function klaytnAlert() {
@@ -265,14 +265,14 @@ async function mbxAlert() {
         winston.debug("43", walletToName);
         const link = "https://kimchiwhale.io/tx/" + txHash;
         const price = await getPrice("MBX"); //current price!!
-        const klay_amount = Number(ethers.utils.formatEther(value));
-        console.log("70", klay_amount);
+        const mbx_amount = Number(ethers.utils.formatEther(value));
+        console.log("70", mbx_amount);
         const d_value_bigN = ethers.BigNumber.from(value)
           .mul(price * 10 ** 10)
           .div(10 ** 10);
         const d_value = Number(ethers.utils.formatEther(d_value_bigN));
         console.log("73", d_value);
-        const message = `🐋 ${klay_amount.toLocaleString("en-US", {
+        const message = `🐋 ${mbx_amount.toLocaleString("en-US", {
           maximumFractionDigits: 0,
         })} #MBX (${d_value.toLocaleString("en-US", {
           maximumFractionDigits: 0,
@@ -280,7 +280,7 @@ async function mbxAlert() {
         const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
         console.log("gasPrice", gasPrice);
         console.log("price", price);
-        console.log("klay_amount", klay_amount);
+        console.log("klay_amount", mbx_amount);
         console.log("message", message);
         const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
         console.log("USED", gasUsed);
