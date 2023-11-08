@@ -22,105 +22,42 @@ jobs:
         username: ubuntu
         key: ${{ secrets.PRIVATE_KEY }}
         envs: GITHUB_SHA
-     
-    - name: Pull Docker image
-      run: sudo docker pull haileythegooner/klaytn_alert:latest
-    - name: Delete old Docker container
-      run: sudo docker rm -f klaytn_alert-container || true 
-    - name: Delete old Docker image
-      run: sudo docker image prune -f
-    - name: Generate Environment Variable File for production  
-      run: |
-        echo "DISCORD_WEBHOOK_URL=$DISCORD_WEBHOOK_URL" >> .env.production
-        echo "DISCORD_APP_ID=$DISCORD_APP_ID" >> .env.production
-        echo "DISCORD_PUBLIC_KEY=$DISCORD_PUBLIC_KEY" >> .env.production
-        echo "DISCORD_URL=$DISCORD_URL" >> .env.production
-        echo "DISCORD_TOKEN=$DISCORD_TOKEN" >> .env.production
-        echo "DISCORD_CHANNELID=$DISCORD_CHANNELID" >> .env.production
+        script: |
+          sudo docker pull haileythegooner/klaytn_alert:latest
+          sudo docker rm -f klaytn_alert-container || true 
+          sudo docker image prune -f
+          
+          echo "DISCORD_WEBHOOK_URL=${{secrets.DISCORD_WEBHOOK_URL}}" >> .env.production
+          echo "DISCORD_APP_ID=${{secrets.DISCORD_APP_ID}}" >> .env.production
+          echo "DISCORD_PUBLIC_KEY=${{secrets.DISCORD_PUBLIC_KEY}}" >> .env.production
+          echo "DISCORD_URL=${{secrets.DISCORD_URL}}" >> .env.production
+          echo "DISCORD_TOKEN=${{secrets.DISCORD_TOKEN}}" >> .env.production
+          echo "DISCORD_CHANNELID=${{secrets.DISCORD_CHANNELID}}" >> .env.production
 
-        echo "wsUrl_klaytn=$wsUrl_klaytn" >> .env.production
-        echo "wsUrl_wemix=$wsUrl_wemix" >> .env.production
+          echo "wsUrl_klaytn=${{secrets.wsUrl_klaytn}}" >> .env.production
+          echo "wsUrl_wemix=${{secrets.wsUrl_wemix}}" >> .env.production
 
-        echo "Threshold_KLAY=$Threshold_KLAY" >> .env.production
-        echo "Threshold_WEMIX=$Threshold_WEMIX" >> .env.production
-        echo "Threshold_MBX=$Threshold_MBX" >> .env.production
+          echo "Threshold_KLAY=${{secrets.Threshold_KLAY}}" >> .env.production
+          echo "Threshold_WEMIX=${{secrets.Threshold_WEMIX}}" >> .env.production
+          echo "Threshold_MBX= ${{secrets.Threshold_MBX}}" >> .env.production
 
-        echo "APP_KEY=$APP_KEY" >> .env.production
-        echo "APP_SECRET=$APP_SECRET" >> .env.production
-        echo "BEARER_TOKEN=$BEARER_TOKEN" >> .env.production
-        echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> .env.production
-        echo "ACCESS_SECRET=$ACCESS_SECRET" >> .env.production
-        echo "CLIENT_ID=$CLIENT_ID"  >> .env.production 
-        echo "CLIENT_SECRET=$CLIENT_SECRET"  >> .env.production
+          echo "APP_KEY=${{secrets.APP_KEY}}" >> .env.production
+          echo "APP_SECRET=${{secrets.APP_SECRET}}" >> .env.production
+          echo "BEARER_TOKEN=${{secrets.BEARER_TOKEN}}" >> .env.production
+          echo "ACCESS_TOKEN=${{secrets.ACCESS_TOKEN}}" >> .env.production
+          echo "ACCESS_SECRET=${{secrets.ACCESS_SECRET}}" >> .env.production
+          echo "CLIENT_ID=${{secrets.CLIENT_ID}}"  >> .env.production 
+          echo "CLIENT_SECRET=${{secrets.CLIENT_SECRET}}"  >> .env.production
+          
+          echo "TELEGRAM_TOKEN=${{secrets.TELEGRAM_TOKEN}}" >> .env.production
+          echo "NGROK_SEVER_URL=${{secrets.NGROK_SEVER_URL}}" >> .env.production
         
-        echo "TELEGRAM_TOKEN=$TELEGRAM_TOKEN" >> .env.production
-        echo "NGROK_SEVER_URL=$NGROK_SEVER_URL" >> .env.production
-        echo "Threshold=$Threshold" >> .env.production
-        echo "Threshold_TEST=$Threshold_TEST" >> .env.production
+          echo "Threshold_TEST=${{secrets.Threshold_TEST}}" >> .env.production
 
-        echo "DB_URL=$DB_URL" >> .env.production
-        echo "COINMARKETCAP=$COINMARKETCAP" >> .env.production
-      env:
-        wsUrl_klaytn: ${{secrets.wsUrl_klaytn}}
-        wsUrl_wemix: ${{secrets.wsUrl_wemix}}
+          echo "DB_URL=${{secrets.DB_URL}}" >> .env.production
+          echo "COINMARKETCAP=${{secrets.COINMARKETCAP}}" >> .env.production
 
-        DISCORD_WEBHOOK_URL: ${{secrets.DISCORD_WEBHOOK_URL}}
-        DISCORD_APP_ID: ${{secrets.DISCORD_APP_ID}}
-        DISCORD_PUBLIC_KEY: ${{secrets.DISCORD_PUBLIC_KEY}}
-        DISCORD_URL: ${{secrets.DISCORD_URL}}
-        DISCORD_TOKEN: ${{secrets.DISCORD_TOKEN}}
-        DISCORD_CHANNELID : ${{secrets.DISCORD_CHANNELID}}
-
-        APP_KEY: ${{secrets.APP_KEY}}
-        APP_SECRET: ${{secrets.APP_SECRET}}
-        BEARER_TOKEN: ${{secrets.BEARER_TOKEN}}
-        ACCESS_TOKEN: ${{secrets.ACCESS_TOKEN}}
-        ACCESS_SECRET: ${{secrets.ACCESS_SECRET}}
-        CLIENT_ID: ${{secrets.CLIENT_ID}} 
-        CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
-        TELEGRAM_TOKEN: ${{secrets.TELEGRAM_TOKEN}}
-        NGROK_SEVER_URL: ${{secrets.NGROK_SEVER_URL}}
-
-        Threshold_KLAY: ${{secrets.Threshold_KLAY}}
-        Threshold_WEMIX: ${{secrets.Threshold_WEMIX}}
-        Threshold_MBX: ${{secrets.Threshold_MBX}}
-        Threshold_TEST: ${{secrets.Threshold_TEST}}
-
-        DB_URL: ${{secrets.DB_URL}}
-        COINMARKETCAP: ${{secrets.COINMARKETCAP}}
-     
-    - name: Run Docker Container
-      env:
-        wsUrl_klaytn: ${{secrets.wsUrl_klaytn}}
-        wsUrl_wemix: ${{secrets.wsUrl_wemix}}
-
-        DISCORD_WEBHOOK_URL: ${{secrets.DISCORD_WEBHOOK_URL}}
-        DISCORD_APP_ID: ${{secrets.DISCORD_APP_ID}}
-        DISCORD_PUBLIC_KEY: ${{secrets.DISCORD_PUBLIC_KEY}}
-        DISCORD_URL: ${{secrets.DISCORD_URL}}
-        DISCORD_TOKEN: ${{secrets.DISCORD_TOKEN}}
-        DISCORD_CHANNELID: ${{secrets.DISCORD_CHANNELID}}
-    
-        APP_KEY: ${{secrets.APP_KEY}}
-        APP_SECRET: ${{secrets.APP_SECRET}}
-        BEARER_TOKEN: ${{secrets.BEARER_TOKEN}}
-        ACCESS_TOKEN: ${{secrets.ACCESS_TOKEN}}
-        ACCESS_SECRET: ${{secrets.ACCESS_SECRET}}
-        CLIENT_ID: ${{secrets.CLIENT_ID}} 
-        CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
-
-        TELEGRAM_TOKEN: ${{secrets.TELEGRAM_TOKEN}}
-        NGROK_SEVER_URL: ${{secrets.NGROK_SEVER_URL}}
-
-        Threshold_KLAY: ${{secrets.Threshold_KLAY}}
-        Threshold_WEMIX: ${{secrets.Threshold_WEMIX}}
-        Threshold_MBX: ${{secrets.Threshold_MBX}}
-
-        DB_URL: ${{secrets.DB_URL}}
-        COINMARKETCAP: ${{secrets.COINMARKETCAP}}
-    
-
-      run: sudo docker run --env-file ./.env.production -d -p 8080:8080 --name klaytn_alert-container haileythegooner/klaytn_alert
+          sudo docker run --env-file ./.env.production -d -p 8080:8080 --name klaytn_alert-container haileythegooner/klaytn_alert
 
       
       
