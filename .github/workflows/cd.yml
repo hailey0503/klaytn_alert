@@ -10,9 +10,19 @@ jobs:
 
   build:
 
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
+    - name: Deploy to prod
+      uses: appleboy/ssh-action@master
+      id: deploy-prod
+      if: contains(github.ref, 'main')
+      with:
+        host: ${{ secrets.HOST_PROD }} # EC2 퍼블릭 IPv4 DNS
+        username: ubuntu
+        key: ${{ secrets.PRIVATE_KEY }}
+        envs: GITHUB_SHA
+     
     - name: Pull Docker image
       run: sudo docker pull haileythegooner/klaytn_alert:latest
     - name: Delete old Docker container
@@ -111,4 +121,6 @@ jobs:
     
 
       run: sudo docker run --env-file ./.env.production -d -p 8080:8080 --name klaytn_alert-container haileythegooner/klaytn_alert
+
+      
       
