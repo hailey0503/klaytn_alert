@@ -26,7 +26,7 @@ async function main() {
   // Initial fetch when the server starts
   klaytnAlert();
   wemixAlert();
-  //mbxAlert()
+  mbxAlert()
 }
 
 async function klaytnAlert() {
@@ -249,7 +249,7 @@ async function mbxAlert() {
       const txHash = event["transactionHash"]; //in event
       console.log("txHash", txHash);
       const whaleThreshold = ethers.utils.parseEther(threshold);
-      //winston.debug('33',whaleThreshold);
+      winston.debug('33',whaleThreshold);
       if (value.gte(whaleThreshold)) {
         //winston.debug('35 in')
         const thisTx = await provider.getTransaction(txHash);
