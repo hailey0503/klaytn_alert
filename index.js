@@ -243,15 +243,12 @@ async function mbxAlert() {
   contract.on("Transfer", async (from, to, amount, event) => {
     try {
       //console.log("event", event)
-      console.log("from", from);
-      console.log("amount", amount);
       const value = amount;
       const txHash = event["transactionHash"]; //in event
-      console.log("txHash", txHash);
+      //console.log("txHash", txHash);
       const whaleThreshold = ethers.utils.parseEther(threshold);
       winston.debug('33',whaleThreshold);
       if (value.gte(whaleThreshold)) {
-        //winston.debug('35 in')
         const thisTx = await provider.getTransaction(txHash);
         console.log("gettx", thisTx);
         const receipt = await thisTx.wait();
