@@ -26,7 +26,7 @@ async function main() {
   // Initial fetch when the server starts
   klaytnAlert();
   wemixAlert();
-  mbxAlert()
+  //mbxAlert()
 }
 
 async function klaytnAlert() {
