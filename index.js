@@ -34,7 +34,7 @@ async function klaytnAlert() {
   winston.debug(wsUrl);
   const networkId = 8217;
   const threshold = process.env.Threshold_KLAY;
-  winston.debug("39", threshold);
+  winston.debug("37", threshold);
   const provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
   const network_id_pair = { networkId: "Klaytn" };
   //winston.warn('14')
@@ -131,6 +131,7 @@ async function wemixAlert() {
   winston.debug(wsUrl);
   const networkId = 1111;
   const threshold = process.env.Threshold_WEMIX;
+  winston.debug("134", threshold);
   const provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
   const coinName = "WeMix";
   const network_id_pair = { networkId: coinName };
@@ -229,6 +230,7 @@ async function mbxAlert() {
   winston.debug(wsUrl);
   const networkId = 8217;
   const threshold = process.env.Threshold_MBX;
+  winston.debug("233", threshold);
   const provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
   const network_id_pair = { networkId: "MBX" };
   //winston.warn('14')
@@ -247,7 +249,7 @@ async function mbxAlert() {
       const txHash = event["transactionHash"]; //in event
       //console.log("txHash", txHash);
       const whaleThreshold = ethers.utils.parseEther(threshold);
-      winston.debug('33',whaleThreshold);
+      //winston.debug('33',whaleThreshold);
       if (value.gte(whaleThreshold)) {
         const thisTx = await provider.getTransaction(txHash);
         console.log("gettx", thisTx);
@@ -299,7 +301,7 @@ async function mbxAlert() {
           link: `https://scope.klaytn.com/tx/`,
         };
 
-        const db_result = insertBlockchainData(blockchainData, "mbx");
+        const db_result = insertBlockchainData(blockchainData, "mbx"); //change it to 'test' when test in local
         console.log("db_result", db_result);
 
         const tweetPromise = tweet(message);
