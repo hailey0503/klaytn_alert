@@ -51,10 +51,11 @@ async function klaytnAlert() {
         const value = thisTx["value"];
         const txHash = thisTx["hash"];
         const whaleThreshold = ethers.utils.parseEther(threshold);
-        //winston.debug('33',whaleThreshold);
+        winston.debug('54',value);
         //winston.warn('57',whaleThreshold);
         if (value.gte(whaleThreshold)) {
-          //winston.debug('35 in')
+          winston.debug('klaytn in', value)
+          //winston.debug('58',whaleThreshold);
           const receipt = await thisTx.wait();
           // console.log("gas??",receipt)
           const fromAddress = thisTx["from"];
@@ -149,10 +150,10 @@ async function wemixAlert() {
         const value = thisTx["value"];
         const txHash = thisTx["hash"];
         const whaleThreshold = ethers.utils.parseEther(threshold);
-        //winston.debug('33',whaleThreshold);
-        //console.log("wemix thisTx",thisTx)
+       
+        winston.debug('54',value);
         if (value.gte(whaleThreshold)) {
-          winston.debug("35 in");
+          winston.debug("wemix in", value);
           const receipt = await thisTx.wait();
           // console.log("gas??",receipt)
           const fromAddress = thisTx["from"];
@@ -211,7 +212,7 @@ async function wemixAlert() {
           };
 
           const db_result = insertBlockchainData(blockchainData, "wemix"); //why {}??
-          console.log("db_result", db_result);
+         // console.log("db_result", db_result);
 
           const tweetPromise = tweet(message);
           const telegramPromise = telegram(message);
@@ -250,16 +251,18 @@ async function mbxAlert() {
       //console.log("txHash", txHash);
       const whaleThreshold = ethers.utils.parseEther(threshold);
       //winston.debug('33',whaleThreshold);
+      winston.debug('54',value);
       if (value.gte(whaleThreshold)) {
+        winston.debug('mbx in',value);
         const thisTx = await provider.getTransaction(txHash);
         console.log("gettx", thisTx);
         const receipt = await thisTx.wait();
         const fromAddress = from;
         const toAddress = to;
-        winston.debug(fromAddress);
-        winston.debug(toAddress);
+       //winston.debug(fromAddress);
+       // winston.debug(toAddress);
         const walletFromName = await fetchWalletInfo(fromAddress);
-        winston.debug("41", walletFromName);
+       // winston.debug("41", walletFromName);
         const walletToName = await fetchWalletInfo(toAddress);
         winston.debug("43", walletToName);
         const link = "https://kimchiwhale.io/tx/" + txHash;
@@ -347,7 +350,7 @@ async function getPrice(coinName) {
 
     if (response.ok) {
       const data = await response.json();
-      console.log("230 data", data);
+      //console.log("230 data", data);
       if (data && Object.keys(data).length > 1) {
         // Log all keys in the data object to verify the content
         console.log("All keys in data:", Object.keys(data));
