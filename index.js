@@ -51,7 +51,7 @@ async function klaytnAlert() {
         const value = thisTx["value"];
         const txHash = thisTx["hash"];
         const whaleThreshold = ethers.utils.parseEther(threshold);
-        winston.debug('54',value);
+        //winston.debug('54',value);
         //winston.warn('57',whaleThreshold);
         if (value.gte(whaleThreshold)) {
           winston.debug('klaytn in', value)
@@ -151,7 +151,7 @@ async function wemixAlert() {
         const txHash = thisTx["hash"];
         const whaleThreshold = ethers.utils.parseEther(threshold);
        
-        winston.debug('54',value);
+        //winston.debug('54',value);
         if (value.gte(whaleThreshold)) {
           winston.debug("wemix in", value);
           const receipt = await thisTx.wait();
@@ -251,7 +251,7 @@ async function mbxAlert() {
       //console.log("txHash", txHash);
       const whaleThreshold = ethers.utils.parseEther(threshold);
       //winston.debug('33',whaleThreshold);
-      winston.debug('54',value);
+      //winston.debug('54',value);
       if (value.gte(whaleThreshold)) {
         winston.debug('mbx in',value);
         const thisTx = await provider.getTransaction(txHash);
