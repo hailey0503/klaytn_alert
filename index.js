@@ -27,6 +27,8 @@ async function main() {
   klaytnAlert();
   wemixAlert();
   mbxAlert()
+  setInterval(() => 
+    console.log('keepalive'), 60 * 5 * 1000);
 }
 
 async function klaytnAlert() {
@@ -399,6 +401,7 @@ async function discord(arg) {
   }
 }
 main()
+  
   .then(/*() => process.exit(0)*/)
   .catch((error) => {
     console.error(error);
