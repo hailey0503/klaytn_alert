@@ -253,10 +253,8 @@ async function mbxAlert() {
       //console.log("event", event)
       const value = amount;
       const txHash = event["transactionHash"]; //in event
-      //console.log("txHash", txHash);
       const whaleThreshold = ethers.utils.parseEther(threshold);
-      //winston.debug('33',whaleThreshold);
-      //winston.debug('54',value);
+      
       if (value.gte(whaleThreshold)) {
         winston.debug('mbx in',value);
         const thisTx = await provider.getTransaction(txHash);
