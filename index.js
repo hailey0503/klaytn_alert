@@ -42,7 +42,9 @@ async function klaytnAlert() {
   // subscribe new block
   provider.on("block", async (block) => {
     try {
-      winston.debug('blockNum klay', block)
+      if (block % 300 === 0) {
+        winston.debug('blockNum klay', block)
+      }
       const result = await provider.getBlockWithTransactions(block);
       const transactions = result.transactions;
 
@@ -62,41 +64,41 @@ async function klaytnAlert() {
           // console.log("gas??",receipt)
           const fromAddress = thisTx["from"];
           const toAddress = thisTx["to"];
-          winston.debug(fromAddress);
-          winston.debug(toAddress);
+          //winston.debug(fromAddress);
+          //winston.debug(toAddress);
           const walletFromName = await fetchWalletInfo(fromAddress);
-          winston.debug("41", walletFromName);
+          //winston.debug("41", walletFromName);
           const walletToName = await fetchWalletInfo(toAddress);
-          winston.debug("43", walletToName);
+          //winston.debug("43", walletToName);
           const link = "https://kimchi-web.vercel.app/tx/" + txHash;
           const price = await getPrice("KLAY"); //current price!!
           const klay_amount = Number(ethers.utils.formatEther(value));
-          console.log("70", klay_amount);
-          winston.debug("74", price);
-          winston.debug("75", klay_amount);
+          //console.log("70", klay_amount);
+          //winston.debug("74", price);
+          //winston.debug("75", klay_amount);
           const d_value_bigN = ethers.BigNumber.from(value)
             .mul(price * 10 ** 10)
             .div(10 ** 10);
           const d_value = Number(ethers.utils.formatEther(d_value_bigN));
-          console.log("78", d_value);
-          winston.debug("79", d_value);
+          //console.log("78", d_value);
+          //winston.debug("79", d_value);
           const message = `🐋 ${klay_amount.toLocaleString("en-US", {
             maximumFractionDigits: 0,
           })} #Klay (${d_value.toLocaleString("en-US", {
             maximumFractionDigits: 0,
           })} USD) is transfered to ${walletToName} from ${walletFromName} ${link}`; //kimchi.io/tx/txHash
           const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
-          console.log("gasPrice", gasPrice);
-          console.log("price", price);
-          console.log("klay_amount", klay_amount);
+          //console.log("gasPrice", gasPrice);
+          //console.log("price", price);
+          //console.log("klay_amount", klay_amount);
           console.log("message", message);
-          winston.debug("86", message);
+          //winston.debug("86", message);
           const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
-          console.log("USED", gasUsed);
+          //console.log("USED", gasUsed);
           const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
-          console.log("gasFee", gasFee);
-          console.log("Value", value, typeof value);
-          console.log("gasFeeString", gasFee.toString());
+          //console.log("gasFee", gasFee);
+          //console.log("Value", value, typeof value);
+          //console.log("gasFeeString", gasFee.toString());
           const gasFeeToString = gasFee.toString();
           const blockchainData = {
             blockchainName: network_id_pair.networkId,
@@ -115,7 +117,7 @@ async function klaytnAlert() {
             blockchainData,
             "transactions"
           );
-          console.log("db_result", db_result);
+          //console.log("db_result", db_result);
 
           const tweetPromise = tweet(message);
           const telegramPromise = telegram(message);
@@ -142,7 +144,9 @@ async function wemixAlert() {
   // subscribe new block
   provider.on("block", async (block) => {
     try {
-      winston.debug('blockNum wemix', block)
+      if (block % 300 === 0) {
+        winston.debug('blockNum wemix', block)
+      }
       const result = await provider.getBlockWithTransactions(block);
       const transactions = result.transactions;
 
@@ -161,8 +165,8 @@ async function wemixAlert() {
           // console.log("gas??",receipt)
           const fromAddress = thisTx["from"];
           const toAddress = thisTx["to"];
-          winston.debug(fromAddress);
-          winston.debug(toAddress);
+          //winston.debug(fromAddress);
+          //winston.debug(toAddress);
 
           const sender =
             fromAddress.slice(0, 7) + "..." + fromAddress.slice(37, 42);
@@ -181,25 +185,25 @@ async function wemixAlert() {
           const d_value_bigN = ethers.BigNumber.from(value)
             .mul(price * 10 ** 10)
             .div(10 ** 10);
-          console.log("161", d_value_bigN);
+          //console.log("161", d_value_bigN);
           const d_value = Number(ethers.utils.formatEther(d_value_bigN));
-          console.log("163", d_value);
+          //console.log("163", d_value);
           const message = `🐋 ${transfer_amount.toLocaleString("en-US", {
             maximumFractionDigits: 0,
           })} #Wemix (${d_value.toLocaleString("en-US", {
             maximumFractionDigits: 0,
           })} USD) is transfered to ${sender} from ${receiver} ${link}`; //kimchi.io/tx/txHash
           const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
-          console.log("gasPrice", gasPrice);
-          console.log("price", price);
-          console.log("wemix transfer_amount", transfer_amount);
+          //console.log("gasPrice", gasPrice);
+          //console.log("price", price);
+          //console.log("wemix transfer_amount", transfer_amount);
           console.log("message", message);
           const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
-          console.log("USED", gasUsed);
+          //console.log("USED", gasUsed);
           const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
-          console.log("gasFee", gasFee);
-          console.log("Value", value, typeof value);
-          console.log("gasFeeString", gasFee.toString());
+          //console.log("gasFee", gasFee);
+          //console.log("Value", value, typeof value);
+          //console.log("gasFeeString", gasFee.toString());
           const gasFeeToString = gasFee.toString();
           const blockchainData = {
             blockchainName: network_id_pair.networkId,
@@ -256,7 +260,7 @@ async function mbxAlert() {
       if (value.gte(whaleThreshold)) {
         winston.debug('mbx in',value);
         const thisTx = await provider.getTransaction(txHash);
-        console.log("gettx", thisTx);
+        //console.log("gettx", thisTx);
         const receipt = await thisTx.wait();
         const fromAddress = from;
         const toAddress = to;
@@ -265,32 +269,32 @@ async function mbxAlert() {
         const walletFromName = await fetchWalletInfo(fromAddress);
        // winston.debug("41", walletFromName);
         const walletToName = await fetchWalletInfo(toAddress);
-        winston.debug("43", walletToName);
+       // winston.debug("43", walletToName);
         const link = "https://kimchiwhale.io/tx/" + txHash;
         const price = await getPrice("MBX"); //current price!!
         const mbx_amount = Number(ethers.utils.formatEther(value));
-        console.log("70", mbx_amount);
+        //console.log("70", mbx_amount);
         const d_value_bigN = ethers.BigNumber.from(value)
           .mul(price * 10 ** 10)
           .div(10 ** 10);
         const d_value = Number(ethers.utils.formatEther(d_value_bigN));
-        console.log("73", d_value);
+        //console.log("73", d_value);
         const message = `🐋 ${mbx_amount.toLocaleString("en-US", {
           maximumFractionDigits: 0,
         })} #MBX (${d_value.toLocaleString("en-US", {
           maximumFractionDigits: 0,
         })} USD) is transfered to ${walletToName} from ${walletFromName} ${link}`; //kimchi.io/tx/txHash
         const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
-        console.log("gasPrice", gasPrice);
-        console.log("price", price);
-        console.log("klay_amount", mbx_amount);
+        //console.log("gasPrice", gasPrice);
+        //console.log("price", price);
+        //console.log("klay_amount", mbx_amount);
         console.log("message", message);
         const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
-        console.log("USED", gasUsed);
+        //console.log("USED", gasUsed);
         const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
-        console.log("gasFee", gasFee);
-        console.log("Value", value, typeof value);
-        console.log("gasFeeString", gasFee.toString());
+        //console.log("gasFee", gasFee);
+        //console.log("Value", value, typeof value);
+        //console.log("gasFeeString", gasFee.toString());
         const gasFeeToString = gasFee.toString();
         const blockchainData = {
           blockchainName: network_id_pair.networkId,
@@ -306,7 +310,7 @@ async function mbxAlert() {
         };
 
         const db_result = insertBlockchainData(blockchainData, "mbx"); //change it to 'test' when test in local
-        console.log("db_result", db_result);
+        //console.log("db_result", db_result);
 
         const tweetPromise = tweet(message);
         const telegramPromise = telegram(message);
@@ -325,7 +329,7 @@ async function fetchWalletInfo(address) {
   const res = await fetch(klaytnScope + address);
   const resJson = await res.json();
   const walletInfo = resJson.result;
-  console.log("107", walletInfo);
+  //console.log("107", walletInfo);
   const addressShort = address.slice(0, 7) + "..." + address.slice(37, 42);
   const walletName = walletInfo.addressName || addressShort;
   winston.debug("from_wallet_name: " + walletName);
@@ -337,7 +341,7 @@ async function insertBlockchainData(data, symbol) {
   const collection = db.collection(symbol); // Replace with your collection name
   try {
     const result = await collection.insertOne(data);
-    console.log("db_result_id(119)", result);
+    //console.log("db_result_id(119)", result);
     return result;
   } catch (error) {
     console.error("Error inserting blockchain data:", error);
@@ -404,6 +408,6 @@ main()
   
   .then(/*() => process.exit(0)*/)
   .catch((error) => {
-    console.error(error);
+    winston.error(error);
     process.exit(1);
   });
