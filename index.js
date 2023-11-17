@@ -40,8 +40,7 @@ async function klaytnAlert() {
   // subscribe new block
   provider.on("block", async (block) => {
     try {
-      const blockNumber_klay = block.number
-      winston.debug('blockNum klay', blockNumber_klay)
+      winston.debug('blockNum klay', block)
       const result = await provider.getBlockWithTransactions(block);
       const transactions = result.transactions;
 
@@ -141,8 +140,7 @@ async function wemixAlert() {
   // subscribe new block
   provider.on("block", async (block) => {
     try {
-      const blockNumber_wemix = block.number
-      winston.debug('blockNum wemix', blockNumber_wemix)
+      winston.debug('blockNum wemix', block)
       const result = await provider.getBlockWithTransactions(block);
       const transactions = result.transactions;
 
