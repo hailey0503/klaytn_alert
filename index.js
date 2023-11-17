@@ -37,13 +37,12 @@ async function klaytnAlert() {
   winston.debug("37", threshold);
   const provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
   const network_id_pair = { networkId: "Klaytn" };
-  //winston.warn('14')
   // subscribe new block
   provider.on("block", async (block) => {
     try {
-      const result = await provider.getBlockWithTransactions(block);
       const blockNumber_klay = await provider.getBlockNumber()
-      winston.debug('blockNum', blockNumber_klay)
+      winston.debug('blockNum klay', blockNumber_klay)
+      const result = await provider.getBlockWithTransactions(block);
       const transactions = result.transactions;
 
       var len = transactions.length;
@@ -142,9 +141,9 @@ async function wemixAlert() {
   // subscribe new block
   provider.on("block", async (block) => {
     try {
-      const result = await provider.getBlockWithTransactions(block);
       const blockNumber_wemix = await provider.getBlockNumber()
-      winston.debug('blockNum', blockNumber_wemix)
+      winston.debug('blockNum wemix', blockNumber_wemix)
+      const result = await provider.getBlockWithTransactions(block);
       const transactions = result.transactions;
 
       var len = transactions.length;
