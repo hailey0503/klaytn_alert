@@ -26,9 +26,8 @@ async function main() {
   // Initial fetch when the server starts
   klaytnAlert();
   wemixAlert();
-  mbxAlert()
-  setInterval(() => 
-    console.log('keepalive'), 60 * 5 * 1000);
+  mbxAlert();
+  setInterval(() => console.log("keepalive"), 60 * 5 * 1000);
 }
 
 async function klaytnAlert() {
@@ -37,13 +36,55 @@ async function klaytnAlert() {
   const networkId = 8217;
   const threshold = process.env.Threshold_KLAY;
   winston.debug("37", threshold);
-  const provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
+
+  const EXPECTED_PONG_BACK = 15000;
+  const KEEP_ALIVE_CHECK_INTERVAL = 7500;
+  let provider;
+  const startConnection = () => {
+    provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
+
+    let pingTimeout = null;
+    let keepAliveInterval = null;
+
+    provider._websocket.on("open", () => {
+      keepAliveInterval = setInterval(() => {
+        winston.debug("Checking if the connection is alive, sending a ping");
+
+        provider._websocket.ping();
+
+        // Use `WebSocket#terminate()`, which immediately destroys the connection,
+        // instead of `WebSocket#close()`, which waits for the close timer.
+        // Delay should be equal to the interval at which your server
+        // sends out pings plus a conservative assumption of the latency.
+        pingTimeout = setTimeout(() => {
+          provider._websocket.terminate();
+        }, EXPECTED_PONG_BACK);
+      }, KEEP_ALIVE_CHECK_INTERVAL);
+
+      // TODO: handle contract listeners setup + indexing
+    });
+
+    provider._websocket.on("close", () => {
+      winston.error("The websocket connection was closed");
+      clearInterval(keepAliveInterval);
+      clearTimeout(pingTimeout);
+      startConnection();
+    });
+
+    provider._websocket.on("pong", () => {
+      winston.debug(
+        "Received pong, so connection is alive, clearing the timeout"
+      );
+      clearInterval(pingTimeout);
+    });
+  };
+  startConnection();
   const network_id_pair = { networkId: "Klaytn" };
   // subscribe new block
   provider.on("block", async (block) => {
     try {
       if (block % 300 === 0) {
-        winston.debug('blockNum klay', block)
+        winston.debug("blockNum klay", block);
       }
       const result = await provider.getBlockWithTransactions(block);
       const transactions = result.transactions;
@@ -58,7 +99,7 @@ async function klaytnAlert() {
         //winston.debug('54',value);
         //winston.warn('57',whaleThreshold);
         if (value.gte(whaleThreshold)) {
-          winston.debug('klaytn in', value)
+          winston.debug("klaytn in", value);
           //winston.debug('58',whaleThreshold);
           const receipt = await thisTx.wait();
           // console.log("gas??",receipt)
@@ -137,7 +178,47 @@ async function wemixAlert() {
   const networkId = 1111;
   const threshold = process.env.Threshold_WEMIX;
   winston.debug("134", threshold);
-  const provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
+  const EXPECTED_PONG_BACK = 15000;
+  const KEEP_ALIVE_CHECK_INTERVAL = 7500;
+  let provider;
+  const startConnection = () => {
+    provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
+    let pingTimeout = null;
+    let keepAliveInterval = null;
+
+    provider._websocket.on("open", () => {
+      keepAliveInterval = setInterval(() => {
+        winston.debug("Checking if the connection is alive, sending a ping");
+
+        provider._websocket.ping();
+
+        // Use `WebSocket#terminate()`, which immediately destroys the connection,
+        // instead of `WebSocket#close()`, which waits for the close timer.
+        // Delay should be equal to the interval at which your server
+        // sends out pings plus a conservative assumption of the latency.
+        pingTimeout = setTimeout(() => {
+          provider._websocket.terminate();
+        }, EXPECTED_PONG_BACK);
+      }, KEEP_ALIVE_CHECK_INTERVAL);
+
+      // TODO: handle contract listeners setup + indexing
+    });
+
+    provider._websocket.on("close", () => {
+      winston.error("The websocket connection was closed");
+      clearInterval(keepAliveInterval);
+      clearTimeout(pingTimeout);
+      startConnection();
+    });
+
+    provider._websocket.on("pong", () => {
+      winston.debug(
+        "Received pong, so connection is alive, clearing the timeout"
+      );
+      clearInterval(pingTimeout);
+    });
+  };
+  startConnection();
   const coinName = "WeMix";
   const network_id_pair = { networkId: coinName };
   //winston.warn('14')
@@ -145,7 +226,7 @@ async function wemixAlert() {
   provider.on("block", async (block) => {
     try {
       if (block % 300 === 0) {
-        winston.debug('blockNum wemix', block)
+        winston.debug("blockNum wemix", block);
       }
       const result = await provider.getBlockWithTransactions(block);
       const transactions = result.transactions;
@@ -157,7 +238,7 @@ async function wemixAlert() {
         const value = thisTx["value"];
         const txHash = thisTx["hash"];
         const whaleThreshold = ethers.utils.parseEther(threshold);
-       
+
         //winston.debug('54',value);
         if (value.gte(whaleThreshold)) {
           winston.debug("wemix in", value);
@@ -219,7 +300,7 @@ async function wemixAlert() {
           };
 
           const db_result = insertBlockchainData(blockchainData, "wemix"); //why {}??
-         // console.log("db_result", db_result);
+          // console.log("db_result", db_result);
 
           const tweetPromise = tweet(message);
           const telegramPromise = telegram(message);
@@ -239,7 +320,48 @@ async function mbxAlert() {
   const networkId = 8217;
   const threshold = process.env.Threshold_MBX;
   winston.debug("233", threshold);
-  const provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
+  const EXPECTED_PONG_BACK = 15000;
+  const KEEP_ALIVE_CHECK_INTERVAL = 7500;
+  let provider;
+  const startConnection = () => {
+    provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
+    let pingTimeout = null;
+    let keepAliveInterval = null;
+
+    provider._websocket.on("open", () => {
+      keepAliveInterval = setInterval(() => {
+        winston.debug("Checking if the connection is alive, sending a ping");
+
+        provider._websocket.ping();
+
+        // Use `WebSocket#terminate()`, which immediately destroys the connection,
+        // instead of `WebSocket#close()`, which waits for the close timer.
+        // Delay should be equal to the interval at which your server
+        // sends out pings plus a conservative assumption of the latency.
+        pingTimeout = setTimeout(() => {
+          provider._websocket.terminate();
+        }, EXPECTED_PONG_BACK);
+      }, KEEP_ALIVE_CHECK_INTERVAL);
+
+      // TODO: handle contract listeners setup + indexing
+    });
+
+    provider._websocket.on("close", () => {
+      winston.error("The websocket connection was closed");
+      clearInterval(keepAliveInterval);
+      clearTimeout(pingTimeout);
+      startConnection();
+    });
+
+    provider._websocket.on("pong", () => {
+      winston.debug(
+        "Received pong, so connection is alive, clearing the timeout"
+      );
+      clearInterval(pingTimeout);
+    });
+  };
+  startConnection();
+
   const network_id_pair = { networkId: "MBX" };
 
   const contractAddress = "0xd068c52d81f4409b9502da926ace3301cc41f623";
@@ -254,20 +376,20 @@ async function mbxAlert() {
       const value = amount;
       const txHash = event["transactionHash"]; //in event
       const whaleThreshold = ethers.utils.parseEther(threshold);
-      
+
       if (value.gte(whaleThreshold)) {
-        winston.debug('mbx in',value);
+        winston.debug("mbx in", value);
         const thisTx = await provider.getTransaction(txHash);
         //console.log("gettx", thisTx);
         const receipt = await thisTx.wait();
         const fromAddress = from;
         const toAddress = to;
-       //winston.debug(fromAddress);
-       // winston.debug(toAddress);
+        //winston.debug(fromAddress);
+        // winston.debug(toAddress);
         const walletFromName = await fetchWalletInfo(fromAddress);
-       // winston.debug("41", walletFromName);
+        // winston.debug("41", walletFromName);
         const walletToName = await fetchWalletInfo(toAddress);
-       // winston.debug("43", walletToName);
+        // winston.debug("43", walletToName);
         const link = "https://kimchiwhale.io/tx/" + txHash;
         const price = await getPrice("MBX"); //current price!!
         const mbx_amount = Number(ethers.utils.formatEther(value));
@@ -403,7 +525,6 @@ async function discord(arg) {
   }
 }
 main()
-  
   .then(/*() => process.exit(0)*/)
   .catch((error) => {
     winston.error(error);
