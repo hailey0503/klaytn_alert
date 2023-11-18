@@ -48,7 +48,7 @@ async function klaytnAlert() {
 
     provider._websocket.on("open", () => {
       keepAliveInterval = setInterval(() => {
-        winston.debug("Checking if the connection is alive, sending a ping");
+        winston.debug("Checking if the klay connection is alive, sending a ping");
 
         provider._websocket.ping();
 
@@ -65,7 +65,7 @@ async function klaytnAlert() {
     });
 
     provider._websocket.on("close", () => {
-      winston.error("The websocket connection was closed");
+      winston.error("The klay websocket connection was closed");
       clearInterval(keepAliveInterval);
       clearTimeout(pingTimeout);
       startConnection();
@@ -73,7 +73,7 @@ async function klaytnAlert() {
 
     provider._websocket.on("pong", () => {
       winston.debug(
-        "Received pong, so connection is alive, clearing the timeout"
+        "Received pong, so klay connection is alive, clearing the timeout"
       );
       clearInterval(pingTimeout);
     });
@@ -188,7 +188,7 @@ async function wemixAlert() {
 
     provider._websocket.on("open", () => {
       keepAliveInterval = setInterval(() => {
-        winston.debug("Checking if the connection is alive, sending a ping");
+        winston.debug("Checking if the wemix connection is alive, sending a ping");
 
         provider._websocket.ping();
 
@@ -205,7 +205,7 @@ async function wemixAlert() {
     });
 
     provider._websocket.on("close", () => {
-      winston.error("The websocket connection was closed");
+      winston.error("The wemix websocket connection was closed");
       clearInterval(keepAliveInterval);
       clearTimeout(pingTimeout);
       startConnection();
@@ -213,7 +213,7 @@ async function wemixAlert() {
 
     provider._websocket.on("pong", () => {
       winston.debug(
-        "Received pong, so connection is alive, clearing the timeout"
+        "Received pong, so wemix connection is alive, clearing the timeout"
       );
       clearInterval(pingTimeout);
     });
@@ -322,7 +322,9 @@ async function mbxAlert() {
   winston.debug("233", threshold);
   const EXPECTED_PONG_BACK = 15000;
   const KEEP_ALIVE_CHECK_INTERVAL = 7500;
+  const network_id_pair = { networkId: "MBX" };
   let provider;
+  let contract;
   const startConnection = () => {
     provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
     let pingTimeout = null;
@@ -330,7 +332,7 @@ async function mbxAlert() {
 
     provider._websocket.on("open", () => {
       keepAliveInterval = setInterval(() => {
-        winston.debug("Checking if the connection is alive, sending a ping");
+        winston.debug("Checking if the mbx connection is alive, sending a ping");
 
         provider._websocket.ping();
 
@@ -345,9 +347,17 @@ async function mbxAlert() {
 
       // TODO: handle contract listeners setup + indexing
     });
+   
 
+    const contractAddress = "0xd068c52d81f4409b9502da926ace3301cc41f623";
+    const contractAbi = [
+      "event Transfer(address indexed from, address indexed to, uint amount)",
+    ];
+  
+    contract = new ethers.Contract(contractAddress, contractAbi, provider);
+    
     provider._websocket.on("close", () => {
-      winston.error("The websocket connection was closed");
+      winston.error("The mbx websocket connection was closed");
       clearInterval(keepAliveInterval);
       clearTimeout(pingTimeout);
       startConnection();
@@ -355,21 +365,14 @@ async function mbxAlert() {
 
     provider._websocket.on("pong", () => {
       winston.debug(
-        "Received pong, so connection is alive, clearing the timeout"
+        "Received pong, so mbx connection is alive, clearing the timeout"
       );
       clearInterval(pingTimeout);
     });
   };
   startConnection();
 
-  const network_id_pair = { networkId: "MBX" };
-
-  const contractAddress = "0xd068c52d81f4409b9502da926ace3301cc41f623";
-  const contractAbi = [
-    "event Transfer(address indexed from, address indexed to, uint amount)",
-  ];
-
-  const contract = new ethers.Contract(contractAddress, contractAbi, provider);
+ 
   contract.on("Transfer", async (from, to, amount, event) => {
     try {
       //console.log("event", event)
