@@ -111,23 +111,22 @@ async function klaytnAlert() {
           //winston.debug("41", walletFromName);
           const walletToName = await fetchWalletInfo(toAddress);
           //winston.debug("43", walletToName);
-          const link = "https://kimchi-web.vercel.app/tx/" + txHash;
+          const link = "https://kimchiwhale.io/tx/" + txHash;
           const price = await getPrice("KLAY"); //current price!!
           const klay_amount = Number(ethers.utils.formatEther(value));
-          //console.log("70", klay_amount);
-          //winston.debug("74", price);
-          //winston.debug("75", klay_amount);
+          console.log("117 currnet krw price returned", price);
+          console.log('118 value (bignumber)', value)
+          console.log("119 value to number", klay_amount);
+         
           const d_value_bigN = ethers.BigNumber.from(value)
             .mul(price * 10 ** 10)
             .div(10 ** 10);
           const d_value = Number(ethers.utils.formatEther(d_value_bigN));
-          //console.log("78", d_value);
-          //winston.debug("79", d_value);
-          const message = `🐋 ${klay_amount.toLocaleString("en-US", {
+          const message = `🐋 ${walletFromName} 에서 ${walletToName} 로 ${klay_amount.toLocaleString("en-US", {
             maximumFractionDigits: 0,
           })} #Klay (${d_value.toLocaleString("en-US", {
             maximumFractionDigits: 0,
-          })} USD) is transfered to ${walletToName} from ${walletFromName} ${link}`; //kimchi.io/tx/txHash
+          })}원) 전송 ${link}`; //kimchi.io/tx/txHash
           const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
           //console.log("gasPrice", gasPrice);
           //console.log("price", price);
@@ -269,11 +268,11 @@ async function wemixAlert() {
           //console.log("161", d_value_bigN);
           const d_value = Number(ethers.utils.formatEther(d_value_bigN));
           //console.log("163", d_value);
-          const message = `🐋 ${transfer_amount.toLocaleString("en-US", {
+          const message = `🐋 ${receiver} 에서 ${sender} 로 ${transfer_amount.toLocaleString("en-US", {
             maximumFractionDigits: 0,
           })} #Wemix (${d_value.toLocaleString("en-US", {
             maximumFractionDigits: 0,
-          })} USD) is transfered to ${sender} from ${receiver} ${link}`; //kimchi.io/tx/txHash
+          })} 원) 전송 ${link}`; //kimchi.io/tx/txHash
           const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
           //console.log("gasPrice", gasPrice);
           //console.log("price", price);
@@ -355,7 +354,7 @@ async function mbxAlert() {
     ];
   
     contract = new ethers.Contract(contractAddress, contractAbi, provider);
-    
+
     provider._websocket.on("close", () => {
       winston.error("The mbx websocket connection was closed");
       clearInterval(keepAliveInterval);
@@ -402,11 +401,11 @@ async function mbxAlert() {
           .div(10 ** 10);
         const d_value = Number(ethers.utils.formatEther(d_value_bigN));
         //console.log("73", d_value);
-        const message = `🐋 ${mbx_amount.toLocaleString("en-US", {
+        const message = `🐋 ${walletFromName}에서 ${walletToName}로 ${mbx_amount.toLocaleString("en-US", {
           maximumFractionDigits: 0,
         })} #MBX (${d_value.toLocaleString("en-US", {
           maximumFractionDigits: 0,
-        })} USD) is transfered to ${walletToName} from ${walletFromName} ${link}`; //kimchi.io/tx/txHash
+        })} 원) 전송 ${link}`; //kimchi.io/tx/txHash
         const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
         //console.log("gasPrice", gasPrice);
         //console.log("price", price);
@@ -461,7 +460,8 @@ async function fetchWalletInfo(address) {
 
 async function insertBlockchainData(data, symbol) {
   const db = client.db("kimchi"); // Replace with your database name
-  const collection = db.collection(symbol); // Replace with your collection name
+  //const collection = db.collection("test"); // Replace with your collection name
+  const collection = db.collection(symbol);
   try {
     const result = await collection.insertOne(data);
     //console.log("db_result_id(119)", result);
@@ -472,7 +472,7 @@ async function insertBlockchainData(data, symbol) {
 }
 
 async function getPrice(coinName) {
-  const coinmarketcap = "https://kimchi-web.vercel.app/api/coinmarketcap";
+  const coinmarketcap = "https://kimchiwhale.io/api/coinmarketcap";
   try {
     const response = await fetch(coinmarketcap);
 
@@ -487,7 +487,8 @@ async function getPrice(coinName) {
       }
       // Check if the coinName exists in the data object
       if (data.hasOwnProperty(coinName)) {
-        return data[coinName].currentPriceUSD.toFixed(10);
+        console.log('490: current krw price (decimal 10)',data[coinName].currentPriceKRW.toFixed(10))
+        return data[coinName].currentPriceKRW.toFixed(10);
       } else {
         throw new Error(`Coin data for '${coinName}' not found.`);
       }
