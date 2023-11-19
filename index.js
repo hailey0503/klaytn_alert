@@ -356,6 +356,77 @@ async function mbxAlert() {
     ];
   
     contract = new ethers.Contract(contractAddress, contractAbi, provider);
+    contract.on("Transfer", async (from, to, amount, event) => {
+      try {
+        //console.log("event", event)
+        const value = amount;
+        const txHash = event["transactionHash"]; //in event
+        const whaleThreshold = ethers.utils.parseEther(threshold);
+  
+        if (value.gte(whaleThreshold)) {
+          winston.debug("mbx in", value);
+          const thisTx = await provider.getTransaction(txHash);
+          //console.log("gettx", thisTx);
+          const receipt = await thisTx.wait();
+          const fromAddress = from;
+          const toAddress = to;
+          //winston.debug(fromAddress);
+          // winston.debug(toAddress);
+          const walletFromName = await fetchWalletInfo(fromAddress);
+          // winston.debug("41", walletFromName);
+          const walletToName = await fetchWalletInfo(toAddress);
+          // winston.debug("43", walletToName);
+          const link = "https://kimchiwhale.io/tx/" + txHash;
+          const price = await getPrice("MBX"); //current price!!
+          const mbx_amount = Number(ethers.utils.formatEther(value));
+          //console.log("70", mbx_amount);
+          const d_value_bigN = ethers.BigNumber.from(value)
+            .mul(price * 10 ** 10)
+            .div(10 ** 10);
+          const d_value = Number(ethers.utils.formatEther(d_value_bigN));
+          //console.log("73", d_value);
+          const message = `🐋 ${walletFromName}에서 ${walletToName}로 ${mbx_amount.toLocaleString("en-US", {
+            maximumFractionDigits: 0,
+          })} #MBX (${d_value.toLocaleString("en-US", {
+            maximumFractionDigits: 0,
+          })} 원) 전송 ${link}`; //kimchi.io/tx/txHash
+          const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
+          //console.log("gasPrice", gasPrice);
+          //console.log("price", price);
+          //console.log("klay_amount", mbx_amount);
+          console.log("message", message);
+          const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
+          //console.log("USED", gasUsed);
+          const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
+          //console.log("gasFee", gasFee);
+          //console.log("Value", value, typeof value);
+          //console.log("gasFeeString", gasFee.toString());
+          const gasFeeToString = gasFee.toString();
+          const blockchainData = {
+            blockchainName: network_id_pair.networkId,
+            timestamp: new Date(),
+            txHash: txHash,
+            sender: walletFromName,
+            sender_full: fromAddress,
+            receiver: walletToName,
+            receiver_full: toAddress,
+            amount: ethers.utils.formatEther(value),
+            fee: gasFeeToString,
+            link: `https://scope.klaytn.com/tx/`,
+          };
+  
+          const db_result = insertBlockchainData(blockchainData, "mbx"); //change it to 'test' when test in local
+          //console.log("db_result", db_result);
+  
+          const tweetPromise = tweet(message);
+          const telegramPromise = telegram(message);
+          const discordPromise = discord(message);
+          await Promise.all([tweetPromise, telegramPromise, discordPromise]);
+        }
+      } catch (e) {
+        winston.error("bmx winston error", e);
+      }
+    });
 
     provider._websocket.on("close", () => {
       winston.error("The mbx websocket connection was closed");
@@ -372,79 +443,6 @@ async function mbxAlert() {
     });
   };
   startConnection();
-
- 
-  contract.on("Transfer", async (from, to, amount, event) => {
-    try {
-      //console.log("event", event)
-      const value = amount;
-      const txHash = event["transactionHash"]; //in event
-      const whaleThreshold = ethers.utils.parseEther(threshold);
-
-      if (value.gte(whaleThreshold)) {
-        winston.debug("mbx in", value);
-        const thisTx = await provider.getTransaction(txHash);
-        //console.log("gettx", thisTx);
-        const receipt = await thisTx.wait();
-        const fromAddress = from;
-        const toAddress = to;
-        //winston.debug(fromAddress);
-        // winston.debug(toAddress);
-        const walletFromName = await fetchWalletInfo(fromAddress);
-        // winston.debug("41", walletFromName);
-        const walletToName = await fetchWalletInfo(toAddress);
-        // winston.debug("43", walletToName);
-        const link = "https://kimchiwhale.io/tx/" + txHash;
-        const price = await getPrice("MBX"); //current price!!
-        const mbx_amount = Number(ethers.utils.formatEther(value));
-        //console.log("70", mbx_amount);
-        const d_value_bigN = ethers.BigNumber.from(value)
-          .mul(price * 10 ** 10)
-          .div(10 ** 10);
-        const d_value = Number(ethers.utils.formatEther(d_value_bigN));
-        //console.log("73", d_value);
-        const message = `🐋 ${walletFromName}에서 ${walletToName}로 ${mbx_amount.toLocaleString("en-US", {
-          maximumFractionDigits: 0,
-        })} #MBX (${d_value.toLocaleString("en-US", {
-          maximumFractionDigits: 0,
-        })} 원) 전송 ${link}`; //kimchi.io/tx/txHash
-        const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
-        //console.log("gasPrice", gasPrice);
-        //console.log("price", price);
-        //console.log("klay_amount", mbx_amount);
-        console.log("message", message);
-        const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
-        //console.log("USED", gasUsed);
-        const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
-        //console.log("gasFee", gasFee);
-        //console.log("Value", value, typeof value);
-        //console.log("gasFeeString", gasFee.toString());
-        const gasFeeToString = gasFee.toString();
-        const blockchainData = {
-          blockchainName: network_id_pair.networkId,
-          timestamp: new Date(),
-          txHash: txHash,
-          sender: walletFromName,
-          sender_full: fromAddress,
-          receiver: walletToName,
-          receiver_full: toAddress,
-          amount: ethers.utils.formatEther(value),
-          fee: gasFeeToString,
-          link: `https://scope.klaytn.com/tx/`,
-        };
-
-        const db_result = insertBlockchainData(blockchainData, "mbx"); //change it to 'test' when test in local
-        //console.log("db_result", db_result);
-
-        const tweetPromise = tweet(message);
-        const telegramPromise = telegram(message);
-        const discordPromise = discord(message);
-        await Promise.all([tweetPromise, telegramPromise, discordPromise]);
-      }
-    } catch (e) {
-      winston.error("bmx winston error", e);
-    }
-  });
 }
 
 async function fetchWalletInfo(address) {
@@ -462,8 +460,8 @@ async function fetchWalletInfo(address) {
 
 async function insertBlockchainData(data, symbol) {
   const db = client.db("kimchi"); // Replace with your database name
-  const collection = db.collection("test"); // Replace with your collection name
-  //const collection = db.collection(symbol);
+  //const collection = db.collection("test"); // Replace with your collection name
+  const collection = db.collection(symbol);
   try {
     const result = await collection.insertOne(data);
     //console.log("db_result_id(119)", result);
