@@ -63,6 +63,96 @@ async function klaytnAlert() {
 
       // TODO: handle contract listeners setup + indexing
     });
+    const network_id_pair = { networkId: "Klaytn" };
+    // subscribe new block
+    provider.on("block", async (block) => {
+      try {
+        if (block % 300 === 0) {
+          winston.debug("blockNum klay", block);
+        }
+        const result = await provider.getBlockWithTransactions(block);
+        const transactions = result.transactions;
+  
+        var len = transactions.length;
+  
+        for (let i = 0; i < len; i++) {
+          const thisTx = transactions[i]; //provider.getTransaction
+          const value = thisTx["value"];
+          const txHash = thisTx["hash"];
+          const whaleThreshold = ethers.utils.parseEther(threshold);
+          //winston.debug('54',value);
+          //winston.warn('57',whaleThreshold);
+          if (value.gte(whaleThreshold)) {
+            winston.debug("klaytn in", value);
+            //winston.debug('58',whaleThreshold);
+            const receipt = await thisTx.wait();
+            // console.log("gas??",receipt)
+            const fromAddress = thisTx["from"];
+            const toAddress = thisTx["to"];
+            //winston.debug(fromAddress);
+            //winston.debug(toAddress);
+            const walletFromName = await fetchWalletInfo(fromAddress);
+            //winston.debug("41", walletFromName);
+            const walletToName = await fetchWalletInfo(toAddress);
+            //winston.debug("43", walletToName);
+            const link = "https://kimchiwhale.io/tx/" + txHash;
+            const price = await getPrice("KLAY"); //current price!!
+            const klay_amount = Number(ethers.utils.formatEther(value));
+            console.log("117 currnet krw price returned", price);
+            console.log('118 value (bignumber)', value)
+            console.log("119 value to number", klay_amount);
+           
+            const d_value_bigN = ethers.BigNumber.from(value)
+              .mul(price * 10 ** 10)
+              .div(10 ** 10);
+            const d_value = Number(ethers.utils.formatEther(d_value_bigN));
+            const message = `🐋 ${walletFromName} 에서 ${walletToName} 로 ${klay_amount.toLocaleString("en-US", {
+              maximumFractionDigits: 0,
+            })} #Klay (${d_value.toLocaleString("en-US", {
+              maximumFractionDigits: 0,
+            })}원) 전송 ${link}`; //kimchi.io/tx/txHash
+            const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
+            //console.log("gasPrice", gasPrice);
+            //console.log("price", price);
+            //console.log("klay_amount", klay_amount);
+            console.log("message", message);
+            //winston.debug("86", message);
+            const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
+            //console.log("USED", gasUsed);
+            const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
+            //console.log("gasFee", gasFee);
+            //console.log("Value", value, typeof value);
+            //console.log("gasFeeString", gasFee.toString());
+            const gasFeeToString = gasFee.toString();
+            const blockchainData = {
+              blockchainName: network_id_pair.networkId,
+              timestamp: new Date(),
+              txHash: txHash,
+              sender: walletFromName,
+              sender_full: fromAddress,
+              receiver: walletToName,
+              receiver_full: toAddress,
+              amount: ethers.utils.formatEther(value),
+              fee: gasFeeToString,
+              link: `https://scope.klaytn.com/tx/`,
+            };
+  
+            const db_result = insertBlockchainData(
+              blockchainData,
+              "transactions"
+            );
+            //console.log("db_result", db_result);
+  
+            const tweetPromise = tweet(message);
+            const telegramPromise = telegram(message);
+            const discordPromise = discord(message);
+            await Promise.all([tweetPromise, telegramPromise, discordPromise]);
+          }
+        }
+      } catch (e) {
+        winston.error("109 winston error", e);
+      }
+    });
 
     provider._websocket.on("close", () => {
       winston.error("The klay websocket connection was closed");
@@ -79,96 +169,7 @@ async function klaytnAlert() {
     });
   };
   startConnection();
-  const network_id_pair = { networkId: "Klaytn" };
-  // subscribe new block
-  provider.on("block", async (block) => {
-    try {
-      if (block % 300 === 0) {
-        winston.debug("blockNum klay", block);
-      }
-      const result = await provider.getBlockWithTransactions(block);
-      const transactions = result.transactions;
-
-      var len = transactions.length;
-
-      for (let i = 0; i < len; i++) {
-        const thisTx = transactions[i]; //provider.getTransaction
-        const value = thisTx["value"];
-        const txHash = thisTx["hash"];
-        const whaleThreshold = ethers.utils.parseEther(threshold);
-        //winston.debug('54',value);
-        //winston.warn('57',whaleThreshold);
-        if (value.gte(whaleThreshold)) {
-          winston.debug("klaytn in", value);
-          //winston.debug('58',whaleThreshold);
-          const receipt = await thisTx.wait();
-          // console.log("gas??",receipt)
-          const fromAddress = thisTx["from"];
-          const toAddress = thisTx["to"];
-          //winston.debug(fromAddress);
-          //winston.debug(toAddress);
-          const walletFromName = await fetchWalletInfo(fromAddress);
-          //winston.debug("41", walletFromName);
-          const walletToName = await fetchWalletInfo(toAddress);
-          //winston.debug("43", walletToName);
-          const link = "https://kimchiwhale.io/tx/" + txHash;
-          const price = await getPrice("KLAY"); //current price!!
-          const klay_amount = Number(ethers.utils.formatEther(value));
-          console.log("117 currnet krw price returned", price);
-          console.log('118 value (bignumber)', value)
-          console.log("119 value to number", klay_amount);
-         
-          const d_value_bigN = ethers.BigNumber.from(value)
-            .mul(price * 10 ** 10)
-            .div(10 ** 10);
-          const d_value = Number(ethers.utils.formatEther(d_value_bigN));
-          const message = `🐋 ${walletFromName} 에서 ${walletToName} 로 ${klay_amount.toLocaleString("en-US", {
-            maximumFractionDigits: 0,
-          })} #Klay (${d_value.toLocaleString("en-US", {
-            maximumFractionDigits: 0,
-          })}원) 전송 ${link}`; //kimchi.io/tx/txHash
-          const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
-          //console.log("gasPrice", gasPrice);
-          //console.log("price", price);
-          //console.log("klay_amount", klay_amount);
-          console.log("message", message);
-          //winston.debug("86", message);
-          const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
-          //console.log("USED", gasUsed);
-          const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
-          //console.log("gasFee", gasFee);
-          //console.log("Value", value, typeof value);
-          //console.log("gasFeeString", gasFee.toString());
-          const gasFeeToString = gasFee.toString();
-          const blockchainData = {
-            blockchainName: network_id_pair.networkId,
-            timestamp: new Date(),
-            txHash: txHash,
-            sender: walletFromName,
-            sender_full: fromAddress,
-            receiver: walletToName,
-            receiver_full: toAddress,
-            amount: ethers.utils.formatEther(value),
-            fee: gasFeeToString,
-            link: `https://scope.klaytn.com/tx/`,
-          };
-
-          const db_result = insertBlockchainData(
-            blockchainData,
-            "transactions"
-          );
-          //console.log("db_result", db_result);
-
-          const tweetPromise = tweet(message);
-          const telegramPromise = telegram(message);
-          const discordPromise = discord(message);
-          await Promise.all([tweetPromise, telegramPromise, discordPromise]);
-        }
-      }
-    } catch (e) {
-      winston.error("109 winston error", e);
-    }
-  });
+ 
 }
 
 async function wemixAlert() {
@@ -202,6 +203,99 @@ async function wemixAlert() {
 
       // TODO: handle contract listeners setup + indexing
     });
+    const coinName = "WeMix";
+    const network_id_pair = { networkId: coinName };
+    //winston.warn('14')
+    // subscribe new block
+    provider.on("block", async (block) => {
+      try {
+        if (block % 300 === 0) {
+          winston.debug("blockNum wemix", block);
+        }
+        const result = await provider.getBlockWithTransactions(block);
+        const transactions = result.transactions;
+  
+        var len = transactions.length;
+  
+        for (let i = 0; i < len; i++) {
+          const thisTx = transactions[i]; //provider.getTransaction
+          const value = thisTx["value"];
+          const txHash = thisTx["hash"];
+          const whaleThreshold = ethers.utils.parseEther(threshold);
+  
+          //winston.debug('54',value);
+          if (value.gte(whaleThreshold)) {
+            winston.debug("wemix in", value);
+            const receipt = await thisTx.wait();
+            // console.log("gas??",receipt)
+            const fromAddress = thisTx["from"];
+            const toAddress = thisTx["to"];
+            //winston.debug(fromAddress);
+            //winston.debug(toAddress);
+  
+            const sender =
+              fromAddress.slice(0, 7) + "..." + fromAddress.slice(37, 42);
+            const receiver =
+              toAddress.slice(0, 7) + "..." + toAddress.slice(37, 42);
+  
+            //const walletFromName = await fetchWalletInfo(fromAddress);
+            //winston.debug("41", walletFromName);
+            //const walletToName = await fetchWalletInfo(toAddress);
+            //winston.debug("43", walletToName);
+            const link = "https://kimchiwhale.io/tx/" + txHash;
+            const price = await getPrice(coinName.toUpperCase()); //current price!!
+  
+            const transfer_amount = Number(ethers.utils.formatEther(value));
+            console.log("159", transfer_amount);
+            const d_value_bigN = ethers.BigNumber.from(value)
+              .mul(price * 10 ** 10)
+              .div(10 ** 10);
+            //console.log("161", d_value_bigN);
+            const d_value = Number(ethers.utils.formatEther(d_value_bigN));
+            //console.log("163", d_value);
+            const message = `🐋 ${receiver} 에서 ${sender} 로 ${transfer_amount.toLocaleString("en-US", {
+              maximumFractionDigits: 0,
+            })} #Wemix (${d_value.toLocaleString("en-US", {
+              maximumFractionDigits: 0,
+            })} 원) 전송 ${link}`; //kimchi.io/tx/txHash
+            const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
+            //console.log("gasPrice", gasPrice);
+            //console.log("price", price);
+            //console.log("wemix transfer_amount", transfer_amount);
+            console.log("message", message);
+            const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
+            //console.log("USED", gasUsed);
+            const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
+            //console.log("gasFee", gasFee);
+            //console.log("Value", value, typeof value);
+            //console.log("gasFeeString", gasFee.toString());
+            const gasFeeToString = gasFee.toString();
+            const blockchainData = {
+              blockchainName: network_id_pair.networkId,
+              timestamp: new Date(),
+              txHash: txHash,
+              sender: sender,
+              sender_full: fromAddress,
+              receiver: receiver,
+              receiver_full: toAddress,
+              amount: ethers.utils.formatEther(value),
+              fee: gasFeeToString,
+              link: `https://explorer.wemix.com/tx/`,
+            };
+  
+            const db_result = insertBlockchainData(blockchainData, "wemix"); //why {}??
+            // console.log("db_result", db_result);
+  
+            const tweetPromise = tweet(message);
+            const telegramPromise = telegram(message);
+            const discordPromise = discord(message);
+            await Promise.all([tweetPromise, telegramPromise, discordPromise]);
+          }
+        }
+      } catch (e) {
+        winston.error("201 winston error", e);
+      }
+    });
 
     provider._websocket.on("close", () => {
       winston.error("The wemix websocket connection was closed");
@@ -218,99 +312,7 @@ async function wemixAlert() {
     });
   };
   startConnection();
-  const coinName = "WeMix";
-  const network_id_pair = { networkId: coinName };
-  //winston.warn('14')
-  // subscribe new block
-  provider.on("block", async (block) => {
-    try {
-      if (block % 300 === 0) {
-        winston.debug("blockNum wemix", block);
-      }
-      const result = await provider.getBlockWithTransactions(block);
-      const transactions = result.transactions;
 
-      var len = transactions.length;
-
-      for (let i = 0; i < len; i++) {
-        const thisTx = transactions[i]; //provider.getTransaction
-        const value = thisTx["value"];
-        const txHash = thisTx["hash"];
-        const whaleThreshold = ethers.utils.parseEther(threshold);
-
-        //winston.debug('54',value);
-        if (value.gte(whaleThreshold)) {
-          winston.debug("wemix in", value);
-          const receipt = await thisTx.wait();
-          // console.log("gas??",receipt)
-          const fromAddress = thisTx["from"];
-          const toAddress = thisTx["to"];
-          //winston.debug(fromAddress);
-          //winston.debug(toAddress);
-
-          const sender =
-            fromAddress.slice(0, 7) + "..." + fromAddress.slice(37, 42);
-          const receiver =
-            toAddress.slice(0, 7) + "..." + toAddress.slice(37, 42);
-
-          //const walletFromName = await fetchWalletInfo(fromAddress);
-          //winston.debug("41", walletFromName);
-          //const walletToName = await fetchWalletInfo(toAddress);
-          //winston.debug("43", walletToName);
-          const link = "https://kimchiwhale.io/tx/" + txHash;
-          const price = await getPrice(coinName.toUpperCase()); //current price!!
-
-          const transfer_amount = Number(ethers.utils.formatEther(value));
-          console.log("159", transfer_amount);
-          const d_value_bigN = ethers.BigNumber.from(value)
-            .mul(price * 10 ** 10)
-            .div(10 ** 10);
-          //console.log("161", d_value_bigN);
-          const d_value = Number(ethers.utils.formatEther(d_value_bigN));
-          //console.log("163", d_value);
-          const message = `🐋 ${receiver} 에서 ${sender} 로 ${transfer_amount.toLocaleString("en-US", {
-            maximumFractionDigits: 0,
-          })} #Wemix (${d_value.toLocaleString("en-US", {
-            maximumFractionDigits: 0,
-          })} 원) 전송 ${link}`; //kimchi.io/tx/txHash
-          const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
-          //console.log("gasPrice", gasPrice);
-          //console.log("price", price);
-          //console.log("wemix transfer_amount", transfer_amount);
-          console.log("message", message);
-          const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
-          //console.log("USED", gasUsed);
-          const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
-          //console.log("gasFee", gasFee);
-          //console.log("Value", value, typeof value);
-          //console.log("gasFeeString", gasFee.toString());
-          const gasFeeToString = gasFee.toString();
-          const blockchainData = {
-            blockchainName: network_id_pair.networkId,
-            timestamp: new Date(),
-            txHash: txHash,
-            sender: sender,
-            sender_full: fromAddress,
-            receiver: receiver,
-            receiver_full: toAddress,
-            amount: ethers.utils.formatEther(value),
-            fee: gasFeeToString,
-            link: `https://explorer.wemix.com/tx/`,
-          };
-
-          const db_result = insertBlockchainData(blockchainData, "wemix"); //why {}??
-          // console.log("db_result", db_result);
-
-          const tweetPromise = tweet(message);
-          const telegramPromise = telegram(message);
-          const discordPromise = discord(message);
-          await Promise.all([tweetPromise, telegramPromise, discordPromise]);
-        }
-      }
-    } catch (e) {
-      winston.error("201 winston error", e);
-    }
-  });
 }
 
 async function mbxAlert() {
@@ -460,8 +462,8 @@ async function fetchWalletInfo(address) {
 
 async function insertBlockchainData(data, symbol) {
   const db = client.db("kimchi"); // Replace with your database name
-  //const collection = db.collection("test"); // Replace with your collection name
-  const collection = db.collection(symbol);
+  const collection = db.collection("test"); // Replace with your collection name
+  //const collection = db.collection(symbol);
   try {
     const result = await collection.insertOne(data);
     //console.log("db_result_id(119)", result);
