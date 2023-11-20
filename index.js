@@ -48,7 +48,9 @@ async function klaytnAlert() {
 
     provider._websocket.on("open", () => {
       keepAliveInterval = setInterval(() => {
-        winston.debug("Checking if the klay connection is alive, sending a ping");
+        winston.debug(
+          "Checking if the klay connection is alive, sending a ping"
+        );
 
         provider._websocket.ping();
 
@@ -72,9 +74,9 @@ async function klaytnAlert() {
         }
         const result = await provider.getBlockWithTransactions(block);
         const transactions = result.transactions;
-  
+
         var len = transactions.length;
-  
+
         for (let i = 0; i < len; i++) {
           const thisTx = transactions[i]; //provider.getTransaction
           const value = thisTx["value"];
@@ -99,16 +101,19 @@ async function klaytnAlert() {
             const price = await getPrice("KLAY"); //current price!!
             const klay_amount = Number(ethers.utils.formatEther(value));
             console.log("117 currnet krw price returned", price);
-            console.log('118 value (bignumber)', value)
+            console.log("118 value (bignumber)", value);
             console.log("119 value to number", klay_amount);
-           
+
             const d_value_bigN = ethers.BigNumber.from(value)
               .mul(price * 10 ** 10)
               .div(10 ** 10);
             const d_value = Number(ethers.utils.formatEther(d_value_bigN));
-            const message = `🐋 ${walletFromName} 에서 ${walletToName} 로 ${klay_amount.toLocaleString("en-US", {
-              maximumFractionDigits: 0,
-            })} #Klay (${d_value.toLocaleString("en-US", {
+            const message = `🐋 ${walletFromName} 에서 ${walletToName} 로 ${klay_amount.toLocaleString(
+              "en-US",
+              {
+                maximumFractionDigits: 0,
+              }
+            )} #Klay (${d_value.toLocaleString("en-US", {
               maximumFractionDigits: 0,
             })}원) 전송 ${link}`; //kimchi.io/tx/txHash
             const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
@@ -136,13 +141,13 @@ async function klaytnAlert() {
               fee: gasFeeToString,
               link: `https://scope.klaytn.com/tx/`,
             };
-  
+
             const db_result = insertBlockchainData(
               blockchainData,
               "transactions"
             );
             //console.log("db_result", db_result);
-  
+
             const tweetPromise = tweet(message);
             const telegramPromise = telegram(message);
             const discordPromise = discord(message);
@@ -169,7 +174,6 @@ async function klaytnAlert() {
     });
   };
   startConnection();
- 
 }
 
 async function wemixAlert() {
@@ -188,7 +192,9 @@ async function wemixAlert() {
 
     provider._websocket.on("open", () => {
       keepAliveInterval = setInterval(() => {
-        winston.debug("Checking if the wemix connection is alive, sending a ping");
+        winston.debug(
+          "Checking if the wemix connection is alive, sending a ping"
+        );
 
         provider._websocket.ping();
 
@@ -214,15 +220,15 @@ async function wemixAlert() {
         }
         const result = await provider.getBlockWithTransactions(block);
         const transactions = result.transactions;
-  
+
         var len = transactions.length;
-  
+
         for (let i = 0; i < len; i++) {
           const thisTx = transactions[i]; //provider.getTransaction
           const value = thisTx["value"];
           const txHash = thisTx["hash"];
           const whaleThreshold = ethers.utils.parseEther(threshold);
-  
+
           //winston.debug('54',value);
           if (value.gte(whaleThreshold)) {
             winston.debug("wemix in", value);
@@ -232,19 +238,19 @@ async function wemixAlert() {
             const toAddress = thisTx["to"];
             //winston.debug(fromAddress);
             //winston.debug(toAddress);
-  
+
             const sender =
               fromAddress.slice(0, 7) + "..." + fromAddress.slice(37, 42);
             const receiver =
               toAddress.slice(0, 7) + "..." + toAddress.slice(37, 42);
-  
+
             //const walletFromName = await fetchWalletInfo(fromAddress);
             //winston.debug("41", walletFromName);
             //const walletToName = await fetchWalletInfo(toAddress);
             //winston.debug("43", walletToName);
             const link = "https://kimchiwhale.io/tx/" + txHash;
             const price = await getPrice(coinName.toUpperCase()); //current price!!
-  
+
             const transfer_amount = Number(ethers.utils.formatEther(value));
             console.log("159", transfer_amount);
             const d_value_bigN = ethers.BigNumber.from(value)
@@ -253,9 +259,12 @@ async function wemixAlert() {
             //console.log("161", d_value_bigN);
             const d_value = Number(ethers.utils.formatEther(d_value_bigN));
             //console.log("163", d_value);
-            const message = `🐋 ${receiver} 에서 ${sender} 로 ${transfer_amount.toLocaleString("en-US", {
-              maximumFractionDigits: 0,
-            })} #Wemix (${d_value.toLocaleString("en-US", {
+            const message = `🐋 ${receiver} 에서 ${sender} 로 ${transfer_amount.toLocaleString(
+              "en-US",
+              {
+                maximumFractionDigits: 0,
+              }
+            )} #Wemix (${d_value.toLocaleString("en-US", {
               maximumFractionDigits: 0,
             })} 원) 전송 ${link}`; //kimchi.io/tx/txHash
             const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
@@ -282,10 +291,10 @@ async function wemixAlert() {
               fee: gasFeeToString,
               link: `https://explorer.wemix.com/tx/`,
             };
-  
+
             const db_result = insertBlockchainData(blockchainData, "wemix"); //why {}??
             // console.log("db_result", db_result);
-  
+
             const tweetPromise = tweet(message);
             const telegramPromise = telegram(message);
             const discordPromise = discord(message);
@@ -312,7 +321,6 @@ async function wemixAlert() {
     });
   };
   startConnection();
-
 }
 
 async function mbxAlert() {
@@ -333,7 +341,9 @@ async function mbxAlert() {
 
     provider._websocket.on("open", () => {
       keepAliveInterval = setInterval(() => {
-        winston.debug("Checking if the mbx connection is alive, sending a ping");
+        winston.debug(
+          "Checking if the mbx connection is alive, sending a ping"
+        );
 
         provider._websocket.ping();
 
@@ -348,13 +358,12 @@ async function mbxAlert() {
 
       // TODO: handle contract listeners setup + indexing
     });
-   
 
     const contractAddress = "0xd068c52d81f4409b9502da926ace3301cc41f623";
     const contractAbi = [
       "event Transfer(address indexed from, address indexed to, uint amount)",
     ];
-  
+
     contract = new ethers.Contract(contractAddress, contractAbi, provider);
     contract.on("Transfer", async (from, to, amount, event) => {
       try {
@@ -362,7 +371,7 @@ async function mbxAlert() {
         const value = amount;
         const txHash = event["transactionHash"]; //in event
         const whaleThreshold = ethers.utils.parseEther(threshold);
-  
+
         if (value.gte(whaleThreshold)) {
           winston.debug("mbx in", value);
           const thisTx = await provider.getTransaction(txHash);
@@ -385,9 +394,12 @@ async function mbxAlert() {
             .div(10 ** 10);
           const d_value = Number(ethers.utils.formatEther(d_value_bigN));
           //console.log("73", d_value);
-          const message = `🐋 ${walletFromName}에서 ${walletToName}로 ${mbx_amount.toLocaleString("en-US", {
-            maximumFractionDigits: 0,
-          })} #MBX (${d_value.toLocaleString("en-US", {
+          const message = `🐋 ${walletFromName}에서 ${walletToName}로 ${mbx_amount.toLocaleString(
+            "en-US",
+            {
+              maximumFractionDigits: 0,
+            }
+          )} #MBX (${d_value.toLocaleString("en-US", {
             maximumFractionDigits: 0,
           })} 원) 전송 ${link}`; //kimchi.io/tx/txHash
           const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
@@ -414,10 +426,10 @@ async function mbxAlert() {
             fee: gasFeeToString,
             link: `https://scope.klaytn.com/tx/`,
           };
-  
+
           const db_result = insertBlockchainData(blockchainData, "mbx"); //change it to 'test' when test in local
           //console.log("db_result", db_result);
-  
+
           const tweetPromise = tweet(message);
           const telegramPromise = telegram(message);
           const discordPromise = discord(message);
@@ -471,29 +483,35 @@ async function insertBlockchainData(data, symbol) {
   }
 }
 
-async function getPrice(coinName) {
-  const coinmarketcap = "https://kimchiwhale.io/api/coinmarketcap";
+async function getPrice(symbol) {
   try {
-    const response = await fetch(coinmarketcap);
+    // Make a request to the CoinMarketCap API for USD
 
-    if (response.ok) {
-      const data = await response.json();
-      //console.log("230 data", data);
-      if (data && Object.keys(data).length > 1) {
-        // Log all keys in the data object to verify the content
-        console.log("All keys in data:", Object.keys(data));
-      } else {
-        throw new Error("Empty or invalid data received from the API.");
+    // Make a request to the CoinMarketCap API for KRW
+    const krwResponse = await fetch(
+      `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=${symbol}&convert=KRW`,
+      {
+        headers: {
+          "X-CMC_PRO_API_KEY": process.env.COINMARKETCAP,
+        },
       }
-      // Check if the coinName exists in the data object
-      if (data.hasOwnProperty(coinName)) {
-        console.log('490: current krw price (decimal 10)',data[coinName].currentPriceKRW.toFixed(10))
-        return data[coinName].currentPriceKRW.toFixed(10);
-      } else {
-        throw new Error(`Coin data for '${coinName}' not found.`);
-      }
+    );
+
+    // Check if both requests were successful
+    if (krwResponse.status === 200) {
+      //const usdData = await usdResponse.json();
+      const krwData = await krwResponse.json();
+
+      //const usdQuote = usdData.data[symbol].quote.USD;
+      const krwQuote = krwData.data[symbol].quote.KRW;
+
+      // Extract relevant data
+      //const currentPriceUSD = usdQuote.price;
+      const currentPriceKRW = krwQuote.price;
+      //const priceChange24h = usdQuote.percent_change_24h;
+      return currentPriceKRW.toFixed(10);
     } else {
-      throw new Error("Failed to fetch data from the API.");
+      throw "Failed to fetch cryptocurrency data";
     }
   } catch (error) {
     console.error("Error:", error.message);
