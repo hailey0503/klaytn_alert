@@ -38,6 +38,7 @@ jobs:
           echo "Threshold_KLAY=${{secrets.Threshold_KLAY}}" >> .env.production
           echo "Threshold_WEMIX=${{secrets.Threshold_WEMIX}}" >> .env.production
           echo "Threshold_MBX=${{secrets.Threshold_MBX}}" >> .env.production
+          echo "Threshold_MBX=${{secrets.Threshold_BORA}}" >> .env.production
 
           echo "APP_KEY=${{secrets.APP_KEY}}" >> .env.production
           echo "APP_SECRET=${{secrets.APP_SECRET}}" >> .env.production

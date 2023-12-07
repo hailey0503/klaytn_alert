@@ -27,6 +27,7 @@ async function main() {
   klaytnAlert();
   wemixAlert();
   mbxAlert();
+  boraAlert();
   setInterval(() => console.log("keepalive"), 60 * 5 * 1000);
 }
 
@@ -450,6 +451,138 @@ async function mbxAlert() {
     provider._websocket.on("pong", () => {
       winston.debug(
         "Received pong, so mbx connection is alive, clearing the timeout"
+      );
+      clearInterval(pingTimeout);
+    });
+  };
+  startConnection();
+}
+
+async function boraAlert() {
+  const wsUrl = process.env.wsUrl_klaytn;
+  winston.debug(wsUrl);
+  const networkId = 8217;
+  const threshold = process.env.Threshold_BORA;
+  winston.debug("233", threshold);
+  const EXPECTED_PONG_BACK = 15000;
+  const KEEP_ALIVE_CHECK_INTERVAL = 7500;
+  const network_id_pair = { networkId: "BORA" };
+  let provider;
+  let contract;
+  const startConnection = () => {
+    provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
+    let pingTimeout = null;
+    let keepAliveInterval = null;
+
+    provider._websocket.on("open", () => {
+      keepAliveInterval = setInterval(() => {
+        winston.debug(
+          "Checking if the Bora connection is alive, sending a ping"
+        );
+
+        provider._websocket.ping();
+
+        // Use `WebSocket#terminate()`, which immediately destroys the connection,
+        // instead of `WebSocket#close()`, which waits for the close timer.
+        // Delay should be equal to the interval at which your server
+        // sends out pings plus a conservative assumption of the latency.
+        pingTimeout = setTimeout(() => {
+          provider._websocket.terminate();
+        }, EXPECTED_PONG_BACK);
+      }, KEEP_ALIVE_CHECK_INTERVAL);
+
+      // TODO: handle contract listeners setup + indexing
+    });
+
+    const contractAddress = "0x02cbe46fb8a1f579254a9b485788f2d86cad51aa";
+    const contractAbi = [
+      "event Transfer(address indexed from, address indexed to, uint amount)",
+    ];
+
+    contract = new ethers.Contract(contractAddress, contractAbi, provider);
+    contract.on("Transfer", async (from, to, amount, event) => {
+      try {
+        //console.log("event", event)
+        const value = amount;
+        const txHash = event["transactionHash"]; //in event
+        const whaleThreshold = ethers.utils.parseEther(threshold);
+
+        if (value.gte(whaleThreshold)) {
+          winston.debug("bora in", value);
+          const thisTx = await provider.getTransaction(txHash);
+          //console.log("gettx", thisTx);
+          const receipt = await thisTx.wait();
+          const fromAddress = from;
+          const toAddress = to;
+          //winston.debug(fromAddress);
+          // winston.debug(toAddress);
+          const walletFromName = await fetchWalletInfo(fromAddress);
+          // winston.debug("41", walletFromName);
+          const walletToName = await fetchWalletInfo(toAddress);
+          // winston.debug("43", walletToName);
+          const link = "https://kimchiwhale.io/tx/" + txHash;
+          const price = await getPrice("BORA"); //current price!!
+          const bora_amount = Number(ethers.utils.formatEther(value));
+          //console.log("70", mbx_amount);
+          const d_value_bigN = ethers.BigNumber.from(value)
+            .mul(price * 10 ** 10)
+            .div(10 ** 10);
+          const d_value = Number(ethers.utils.formatEther(d_value_bigN));
+          //console.log("73", d_value);
+          const message = `🐋 ${walletFromName}에서 ${walletToName}로 ${bora_amount.toLocaleString(
+            "en-US",
+            {
+              maximumFractionDigits: 0,
+            }
+          )} #BORA (${d_value.toLocaleString("en-US", {
+            maximumFractionDigits: 0,
+          })} 원) 전송 ${link}`; //kimchi.io/tx/txHash
+          const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
+    
+          console.log("message", message);
+          const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
+          //console.log("USED", gasUsed);
+          const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
+          //console.log("gasFee", gasFee);
+          //console.log("Value", value, typeof value);
+          //console.log("gasFeeString", gasFee.toString());
+          const gasFeeToString = gasFee.toString();
+          const blockchainData = {
+            blockchainName: network_id_pair.networkId,
+            timestamp: new Date(),
+            txHash: txHash,
+            sender: walletFromName,
+            sender_full: fromAddress,
+            receiver: walletToName,
+            receiver_full: toAddress,
+            amount: ethers.utils.formatEther(value),
+            fee: gasFeeToString,
+            link: `https://scope.klaytn.com/tx/`,
+          };
+
+          const db_result = insertBlockchainData(blockchainData, "bora"); //change it to 'test' when test in local
+          //console.log("db_result", db_result);
+
+          const tweetPromise = tweet(message);
+          const telegramPromise = telegram(message);
+          const discordPromise = discord(message);
+          await Promise.all([tweetPromise, telegramPromise, discordPromise]);
+        }
+      } catch (e) {
+        winston.error("bmx winston error", e);
+      }
+    });
+
+    provider._websocket.on("close", () => {
+      winston.error("The bora websocket connection was closed");
+      clearInterval(keepAliveInterval);
+      clearTimeout(pingTimeout);
+      startConnection();
+    });
+
+    provider._websocket.on("pong", () => {
+      winston.debug(
+        "Received pong, so bora connection is alive, clearing the timeout"
       );
       clearInterval(pingTimeout);
     });
