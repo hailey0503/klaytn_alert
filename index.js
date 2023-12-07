@@ -182,7 +182,7 @@ async function wemixAlert() {
   winston.debug(wsUrl);
   const networkId = 1111;
   const threshold = process.env.Threshold_WEMIX;
-  winston.debug("134", threshold);
+  winston.debug("185", threshold);
   const EXPECTED_PONG_BACK = 15000;
   const KEEP_ALIVE_CHECK_INTERVAL = 7500;
   let provider;
@@ -329,7 +329,7 @@ async function mbxAlert() {
   winston.debug(wsUrl);
   const networkId = 8217;
   const threshold = process.env.Threshold_MBX;
-  winston.debug("233", threshold);
+  winston.debug("332", threshold);
   const EXPECTED_PONG_BACK = 15000;
   const KEEP_ALIVE_CHECK_INTERVAL = 7500;
   const network_id_pair = { networkId: "MBX" };
@@ -437,7 +437,7 @@ async function mbxAlert() {
           await Promise.all([tweetPromise, telegramPromise, discordPromise]);
         }
       } catch (e) {
-        winston.error("bmx winston error", e);
+        winston.error("mbx winston error", e);
       }
     });
 
@@ -463,7 +463,7 @@ async function boraAlert() {
   winston.debug(wsUrl);
   const networkId = 8217;
   const threshold = process.env.Threshold_BORA;
-  winston.debug("233", threshold);
+  winston.debug("466", threshold);
   const EXPECTED_PONG_BACK = 15000;
   const KEEP_ALIVE_CHECK_INTERVAL = 7500;
   const network_id_pair = { networkId: "BORA" };
@@ -569,7 +569,7 @@ async function boraAlert() {
           await Promise.all([tweetPromise, telegramPromise, discordPromise]);
         }
       } catch (e) {
-        winston.error("bmx winston error", e);
+        winston.error("bora winston error", e);
       }
     });
 
