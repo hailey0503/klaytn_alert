@@ -5,6 +5,10 @@ const { userClient } = require("./twitterClient.js");
 const { sendMessage } = require("./telegram.js");
 const { discordClient, sendDiscordMessage } = require("./discord.js");
 const { MongoClient } = require("mongodb");
+const fs = require("fs");
+
+const result_eth = JSON.parse(fs.readFileSync("./data/accountLabels_eth.json"));
+const result_wemix = JSON.parse(fs.readFileSync("./data/accountLabels_wemix.json"));
 
 const uri = process.env.DB_URL; // Replace with your MongoDB URI
 const client = new MongoClient(uri, {
@@ -28,6 +32,8 @@ async function main() {
   wemixAlert();
   mbxAlert();
   boraAlert();
+  //ghubAlert();
+  //plaAlert()
   setInterval(() => console.log("keepalive"), 60 * 5 * 1000);
 }
 
@@ -240,10 +246,8 @@ async function wemixAlert() {
             //winston.debug(fromAddress);
             //winston.debug(toAddress);
 
-            const sender =
-              fromAddress.slice(0, 7) + "..." + fromAddress.slice(37, 42);
-            const receiver =
-              toAddress.slice(0, 7) + "..." + toAddress.slice(37, 42);
+            const sender = getWalletInfo_wemix(fromAddress, result_wemix);
+            const receiver = getWalletInfo_wemix(fromAddress, result_wemix);
 
             //const walletFromName = await fetchWalletInfo(fromAddress);
             //winston.debug("41", walletFromName);
@@ -590,6 +594,270 @@ async function boraAlert() {
   startConnection();
 }
 
+async function ghubAlert() {
+  const wsUrl = process.env.wsUrl_klaytn;
+  winston.debug(wsUrl);
+  const networkId = 8217;
+  const threshold = process.env.Threshold_GHUB;
+  winston.debug("599", threshold);
+  const EXPECTED_PONG_BACK = 15000;
+  const KEEP_ALIVE_CHECK_INTERVAL = 7500;
+  const network_id_pair = { networkId: "GHUB" };
+  let provider;
+  let contract;
+  const startConnection = () => {
+    provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
+    let pingTimeout = null;
+    let keepAliveInterval = null;
+
+    provider._websocket.on("open", () => {
+      keepAliveInterval = setInterval(() => {
+        winston.debug(
+          "Checking if the Ghub connection is alive, sending a ping"
+        );
+
+        provider._websocket.ping();
+
+        pingTimeout = setTimeout(() => {
+          provider._websocket.terminate();
+        }, EXPECTED_PONG_BACK);
+      }, KEEP_ALIVE_CHECK_INTERVAL);
+
+      // TODO: handle contract listeners setup + indexing
+    });
+
+    const contractAddress = "0x4836cc1f355bb2a61c210eaa0cd3f729160cd95e";
+    const contractAbi = [
+      "event Transfer(address indexed from, address indexed to, uint amount)",
+    ];
+
+    contract = new ethers.Contract(contractAddress, contractAbi, provider);
+    contract.on("Transfer", async (from, to, amount, event) => {
+      try {
+        //console.log("event", event)
+        const value = amount;
+        const txHash = event["transactionHash"]; //in event
+        const whaleThreshold = ethers.utils.parseEther(threshold);
+
+        if (value.gte(whaleThreshold)) {
+          winston.debug("bora in", value);
+          const thisTx = await provider.getTransaction(txHash);
+          //console.log("gettx", thisTx);
+          const receipt = await thisTx.wait();
+          const fromAddress = from;
+          const toAddress = to;
+          //winston.debug(fromAddress);
+          // winston.debug(toAddress);
+          const walletFromName = await fetchWalletInfo(fromAddress);
+          // winston.debug("41", walletFromName);
+          const walletToName = await fetchWalletInfo(toAddress);
+          // winston.debug("43", walletToName);
+          const link = "https://kimchiwhale.io/tx/" + txHash;
+          const price = await getPrice("GHUB"); //current price!!
+          const ghub_amount = Number(ethers.utils.formatEther(value));
+          //console.log("70", mbx_amount);
+          const d_value_bigN = ethers.BigNumber.from(value)
+            .mul(price * 10 ** 10)
+            .div(10 ** 10);
+          const d_value = Number(ethers.utils.formatEther(d_value_bigN));
+          //console.log("73", d_value);
+          const message = `🐋 ${walletFromName}에서 ${walletToName}로 ${ghub_amount.toLocaleString(
+            "en-US",
+            {
+              maximumFractionDigits: 0,
+            }
+          )} #GHUB (${d_value.toLocaleString("en-US", {
+            maximumFractionDigits: 0,
+          })} 원) 전송 ${link}`; //kimchi.io/tx/txHash
+          const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
+    
+          console.log("message", message);
+          const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
+          //console.log("USED", gasUsed);
+          const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
+          //console.log("gasFee", gasFee);
+          //console.log("Value", value, typeof value);
+          //console.log("gasFeeString", gasFee.toString());
+          const gasFeeToString = gasFee.toString();
+          const blockchainData = {
+            blockchainName: network_id_pair.networkId,
+            timestamp: new Date(),
+            txHash: txHash,
+            sender: walletFromName,
+            sender_full: fromAddress,
+            receiver: walletToName,
+            receiver_full: toAddress,
+            amount: ethers.utils.formatEther(value),
+            fee: gasFeeToString,
+            link: `https://scope.klaytn.com/tx/`,
+          };
+
+          const db_result = insertBlockchainData(blockchainData, "ghub"); //change it to 'test' when test in local
+          //console.log("db_result", db_result);
+
+          const tweetPromise = tweet(message);
+          const telegramPromise = telegram(message);
+          const discordPromise = discord(message);
+          await Promise.all([tweetPromise, telegramPromise, discordPromise]);
+        }
+      } catch (e) {
+        winston.error("ghub winston error", e);
+      }
+    });
+
+    provider._websocket.on("close", () => {
+      winston.error("The ghub websocket connection was closed");
+      clearInterval(keepAliveInterval);
+      clearTimeout(pingTimeout);
+      startConnection();
+    });
+
+    provider._websocket.on("pong", () => {
+      winston.debug(
+        "Received pong, so ghub connection is alive, clearing the timeout"
+      );
+      clearInterval(pingTimeout);
+    });
+  };
+  startConnection();
+}
+
+
+async function plaAlert() {
+  const wsETHUrl = process.env.WSETHURL;
+  winston.debug(wsETHUrl);
+  const networkId = 1;
+  const threshold = process.env.Threshold_GHUB;
+  winston.debug("736", threshold);
+  const EXPECTED_PONG_BACK = 15000;
+  const KEEP_ALIVE_CHECK_INTERVAL = 7500;
+  const network_id_pair = { networkId: "PLA" };
+  let provider;
+  let erc20;
+  const startConnection = () => {
+    console.log('738')
+    provider = new ethers.providers.WebSocketProvider(wsETHUrl, networkId); //setting up a WebSocket connection to an Ethereum node.
+    let pingTimeout = null;
+    let keepAliveInterval = null;
+    const abi = [
+      // Read-Only Functions
+      "function balanceOf(address owner) view returns (uint256)",
+      "function decimals() view returns (uint8)",
+      "function symbol() view returns (string)",
+  
+      // Authenticated Functions
+      "function transfer(address to, uint amount) returns (bool)",
+  
+      // Events
+      "event Transfer(address indexed from, address indexed to, uint amount)",
+    ];
+    const plaAddress = "0x3a4f40631a4f906c2BaD353Ed06De7A5D3fCb430";
+    erc20 = new ethers.Contract(plaAddress, abi, provider);
+    //sets up an event listener for the "Transfer" event of the ERC-20 token contract.
+    erc20.on("Transfer", async (from, to, amount, event) => {
+      console.log('758')
+      keepAliveInterval = setInterval(() => {
+        winston.debug(
+          "Checking if the PLA connection is alive, sending a ping"
+        );
+
+        provider._websocket.ping();
+
+        pingTimeout = setTimeout(() => {
+          provider._websocket.terminate();
+        }, EXPECTED_PONG_BACK);
+      }, KEEP_ALIVE_CHECK_INTERVAL);
+
+      try {
+        //console.log("event", event)
+        const value = amount;
+        const txHash =event.transactionHash; //event tx -> console.log
+        const whaleThreshold = ethers.utils.parseEther(threshold);
+
+        if (value.gte(whaleThreshold)) {
+          winston.debug("bora in", value);
+        //  const thisTx = await provider.getTransaction(txHash);
+          //console.log("gettx", thisTx);
+         // const receipt = await thisTx.wait();
+          const fromAddress = from;
+          const toAddress = to;
+          //winston.debug(fromAddress);
+          // winston.debug(toAddress);
+          const walletFromName = getWalletInfo_eth(fromAddress, result_eth);
+          // winston.debug("41", walletFromName);
+          const walletToName = getWalletInfo_eth(toAddress, result_eth);
+          // winston.debug("43", walletToName);
+          const link = "https://etherscan.io/tx/" + txHash;
+          const price = await getPrice("pla"); //current price!!
+          const pla_amount = Number(ethers.utils.formatEther(value));
+          //console.log("70", mbx_amount);
+          const d_value_bigN = ethers.BigNumber.from(value)
+            .mul(price * 10 ** 10)
+            .div(10 ** 10);
+          const d_value = Number(ethers.utils.formatEther(d_value_bigN));
+          //console.log("73", d_value);
+          const message = `🐋 ${walletFromName}에서 ${walletToName}로 ${pla_amount.toLocaleString(
+            "en-US",
+            {
+              maximumFractionDigits: 0,
+            }
+          )} #PLA (${d_value.toLocaleString("en-US", {
+            maximumFractionDigits: 0,
+          })} 원) 전송 ${link}`; //kimchi.io/tx/txHash
+          const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
+    
+          console.log("message", message);
+          const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
+          //console.log("USED", gasUsed);
+          const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
+          //console.log("gasFee", gasFee);
+          //console.log("Value", value, typeof value);
+          //console.log("gasFeeString", gasFee.toString());
+          const gasFeeToString = gasFee.toString();
+          const blockchainData = {
+            blockchainName: network_id_pair.networkId,
+            timestamp: new Date(),
+            txHash: txHash,
+            sender: walletFromName,
+            sender_full: fromAddress,
+            receiver: walletToName,
+            receiver_full: toAddress,
+            amount: ethers.utils.formatEther(value),
+            fee: gasFeeToString,
+            link: `https://etherscan.io/tx/`,
+          };
+
+          const db_result = insertBlockchainData(blockchainData, "pla"); //change it to 'test' when test in local
+          //console.log("db_result", db_result);
+
+          const tweetPromise = tweet(message);
+          const telegramPromise = telegram(message);
+          const discordPromise = discord(message);
+          await Promise.all([tweetPromise, telegramPromise, discordPromise]);
+        }
+      } catch (e) {
+        winston.error("pla winston error", e);
+      }
+    });
+
+    erc20.on("close", () => {
+      winston.error("The pla websocket connection was closed");
+      clearInterval(keepAliveInterval);
+      clearTimeout(pingTimeout);
+      startConnection();
+    });
+
+   erc20.on("pong", () => {
+      winston.debug(
+        "Received pong, so pla connection is alive, clearing the timeout"
+      );
+      clearInterval(pingTimeout);
+    });
+  };
+  startConnection();
+}
+
+
 async function fetchWalletInfo(address) {
   winston.debug("69 fetch in");
   const klaytnScope = "https://api-cypress.klaytnscope.com/v2/accounts/";
@@ -602,6 +870,37 @@ async function fetchWalletInfo(address) {
   winston.debug("from_wallet_name: " + walletName);
   return walletName;
 }
+
+function getWalletInfo_eth(address, result) {
+  winston.debug("getwallet");
+
+  const addressShort = address.slice(0, 7) + "..." + address.slice(37, 42);
+  winston.debug("short", addressShort);
+
+  winston.debug("result", result[address]);
+  const walletName = addressShort;
+  if (result_eth[address]) {
+    walletName = result_eth[address].name;
+  }
+  winston.debug("from_wallet_name: " + walletName);
+  return walletName;
+}
+
+function getWalletInfo_wemix(address, result) {
+  winston.debug("getwallet");
+
+  const addressShort = address.slice(0, 7) + "..." + address.slice(37, 42);
+  winston.debug("short", addressShort);
+
+  winston.debug("result", result[address]);
+  const walletName = addressShort;
+  if (result_wemix[address]) {
+    walletName = result_wemix[address];
+  }
+  winston.debug("from_wallet_name: " + walletName);
+  return walletName;
+}
+
 
 async function insertBlockchainData(data, symbol) {
   const db = client.db("kimchi"); // Replace with your database name
