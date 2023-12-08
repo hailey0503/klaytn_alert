@@ -247,7 +247,7 @@ async function wemixAlert() {
             //winston.debug(toAddress);
 
             const sender = getWalletInfo_wemix(fromAddress, result_wemix);
-            const receiver = getWalletInfo_wemix(fromAddress, result_wemix);
+            const receiver = getWalletInfo_wemix(toAddress, result_wemix);
 
             //const walletFromName = await fetchWalletInfo(fromAddress);
             //winston.debug("41", walletFromName);
