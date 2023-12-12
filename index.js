@@ -243,11 +243,13 @@ async function wemixAlert() {
             // console.log("gas??",receipt)
             const fromAddress = thisTx["from"];
             const toAddress = thisTx["to"];
-            //winston.debug(fromAddress);
-            //winston.debug(toAddress);
+            winston.debug('프롬',fromAddress);
+            winston.debug('투',toAddress);
 
             const sender = getWalletInfo_wemix(fromAddress, result_wemix);
             const receiver = getWalletInfo_wemix(toAddress, result_wemix);
+            console.log("sender", sender)
+            console.log("receiver", receiver)
 
             //const walletFromName = await fetchWalletInfo(fromAddress);
             //winston.debug("41", walletFromName);
@@ -264,7 +266,7 @@ async function wemixAlert() {
             //console.log("161", d_value_bigN);
             const d_value = Number(ethers.utils.formatEther(d_value_bigN));
             //console.log("163", d_value);
-            const message = `🐋 ${receiver} 에서 ${sender} 로 ${transfer_amount.toLocaleString(
+            const message = `🐋 ${sender} 에서 ${receiver} 로 ${transfer_amount.toLocaleString(
               "en-US",
               {
                 maximumFractionDigits: 0,
