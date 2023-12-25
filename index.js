@@ -830,8 +830,7 @@ async function plaAlert() {
           };
 
           const db_result = insertBlockchainData(blockchainData, "pla"); //change it to 'test' when test in local
-          //console.log("db_result", db_result);
-
+      
           const tweetPromise = tweet(message);
           const telegramPromise = telegram(message);
           const discordPromise = discord(message);
@@ -975,6 +974,7 @@ async function discord(arg) {
   winston.debug("discord in");
   try {
     await sendDiscordMessage(arg);
+    console.log("discord sent");
   } catch (e) {
     winston.debug("discord e");
     console.error(e);
