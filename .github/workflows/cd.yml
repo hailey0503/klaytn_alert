@@ -40,6 +40,9 @@ jobs:
           echo "Threshold_MBX=${{secrets.Threshold_MBX}}" >> .env.production
           echo "Threshold_BORA=${{secrets.Threshold_BORA}}" >> .env.production
           echo "Threshold_GHUB=${{secrets.Threshold_GHUB}}" >> .env.production
+          echo "Threshold_KLEVA=${{secrets.Threshold_KLEVA}}" >> .env.production
+          echo "Threshold_SSX=${{secrets.Threshold_SSX}}" >> .env.production
+          echo "Threshold_PLA=${{secrets.Threshold_PLA}}" >> .env.production
 
           echo "APP_KEY=${{secrets.APP_KEY}}" >> .env.production
           echo "APP_SECRET=${{secrets.APP_SECRET}}" >> .env.production
@@ -52,7 +55,7 @@ jobs:
           echo "TELEGRAM_TOKEN=${{secrets.TELEGRAM_TOKEN}}" >> .env.production
           echo "NGROK_SEVER_URL=${{secrets.NGROK_SEVER_URL}}" >> .env.production
       
-
+          echo "WSETHURL=${{secrets.WSETHURL}}" >> .env.production
           echo "DB_URL=${{secrets.DB_URL}}" >> .env.production
           echo "COINMARKETCAP=${{secrets.COINMARKETCAP}}" >> .env.production
 
