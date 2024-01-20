@@ -36,7 +36,7 @@ async function main() {
   mbxAlert();
   boraAlert();
   //ghubAlert();
-  plaAlert()
+  //plaAlert()
   //klevaAlert();
   //ssxAlert();
 
