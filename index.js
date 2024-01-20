@@ -31,14 +31,14 @@ async function connectToMongoDB() {
 async function main() {
   connectToMongoDB();
   // Initial fetch when the server starts
-  //klaytnAlert();
-  //wemixAlert();
-  //mbxAlert();
-  //boraAlert();
+  klaytnAlert();
+  wemixAlert();
+  mbxAlert();
+  boraAlert();
   //ghubAlert();
   plaAlert()
-  //klevaAlert();
-  //ssxAlert();
+  klevaAlert();
+  ssxAlert();
 
   
   //fnsaAlert();
