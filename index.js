@@ -36,11 +36,10 @@ async function main() {
   mbxAlert();
   boraAlert();
   //ghubAlert();
-  //plaAlert()
-  //klevaAlert();
-  //ssxAlert();
+  plaAlert()
+  klevaAlert();
+  ssxAlert();
 
-  
   //fnsaAlert();
   setInterval(() => console.log("keepalive"), 60 * 5 * 1000);
 }
