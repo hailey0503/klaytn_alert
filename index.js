@@ -37,8 +37,8 @@ async function main() {
   boraAlert();
   //ghubAlert();
   plaAlert()
-  klevaAlert();
-  ssxAlert();
+  //klevaAlert();
+  //ssxAlert();
 
   
   //fnsaAlert();
