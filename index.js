@@ -1039,7 +1039,7 @@ async function ssxAlert() {
         );
 
         provider._websocket.ping();
-
+ 
         // Use `WebSocket#terminate()`, which immediately destroys the connection,
         // instead of `WebSocket#close()`, which waits for the close timer.
         // Delay should be equal to the interval at which your server
