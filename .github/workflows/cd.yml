@@ -12,7 +12,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    steps:
+    steps:  
     - name: Deploy to prod
       uses: appleboy/ssh-action@master
       id: deploy-prod
