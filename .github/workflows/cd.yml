@@ -20,7 +20,7 @@ jobs:
       with:
         host: ${{ secrets.HOST_PROD }} # EC2 퍼블릭 IPv4 DNS
         username: ubuntu
-        key: ${{ secrets.PRIVATE_KEY }}
+        key: ${{ secrets.PRIVATE_KEY }} #ssh pk(?)
         envs: GITHUB_SHA
         script: |
           sudo docker pull haileythegooner/klaytn_alert:latest
