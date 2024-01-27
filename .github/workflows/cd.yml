@@ -43,6 +43,8 @@ jobs:
           echo "Threshold_KLEVA=${{secrets.Threshold_KLEVA}}" >> .env.production
           echo "Threshold_SSX=${{secrets.Threshold_SSX}}" >> .env.production
           echo "Threshold_PLA=${{secrets.Threshold_PLA}}" >> .env.production
+          echo "Threshold_BFC=${{secrets.Threshold_BFC}}" >> .env.production
+          echo "Threshold_CTC=${{secrets.Threshold_CTC}}" >> .env.production
 
           echo "APP_KEY=${{secrets.APP_KEY}}" >> .env.production
           echo "APP_SECRET=${{secrets.APP_SECRET}}" >> .env.production

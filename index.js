@@ -1,4 +1,5 @@
 require("dotenv").config();
+const ccxt = require("ccxt");
 const ethers = require("ethers");
 const winston = require("./winston.js");
 const { userClient } = require("./twitterClient.js");
@@ -30,17 +31,17 @@ async function connectToMongoDB() {
 
 async function main() {
   connectToMongoDB();
-  // Initial fetch when the server starts
+  //Initial fetch when the server starts
   klaytnAlert();
   wemixAlert();
   mbxAlert();
   boraAlert();
   //ghubAlert();
   plaAlert()
-  klevaAlert();
   ssxAlert();
-
-  //fnsaAlert();
+  //nptAlert();
+  //bfcAlert();
+  ctcAlert();
   setInterval(() => console.log("keepalive"), 60 * 5 * 1000);
 }
 
@@ -131,17 +132,12 @@ async function klaytnAlert() {
               maximumFractionDigits: 0,
             })}원) 전송 ${link}`; //kimchi.io/tx/txHash
             const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
-            //console.log("gasPrice", gasPrice);
-            //console.log("price", price);
-            //console.log("klay_amount", klay_amount);
             console.log("message", message);
             //winston.debug("86", message);
             const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
             //console.log("USED", gasUsed);
             const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
-            //console.log("gasFee", gasFee);
-            //console.log("Value", value, typeof value);
-            //console.log("gasFeeString", gasFee.toString());
+           
             const gasFeeToString = gasFee.toString();
             const blockchainData = {
               blockchainName: network_id_pair.networkId,
@@ -803,18 +799,18 @@ async function plaAlert() {
 
         if (value.gte(whaleThreshold)) {
           winston.debug("pla in", value);
-          //  const thisTx = await provider.getTransaction(txHash);
+          const thisTx = await provider.getTransaction(txHash);
           //console.log("gettx", thisTx);
-          // const receipt = await thisTx.wait();
+          const receipt = await thisTx.wait();
           const fromAddress = from;
           const toAddress = to;
           //winston.debug(fromAddress);
           // winston.debug(toAddress);
-          const walletFromName = getWalletInfo_eth(fromAddress, result_eth);
+          const walletFromName = getWalletInfo_eth(fromAddress);
           // winston.debug("41", walletFromName);
-          const walletToName = getWalletInfo_eth(toAddress, result_eth);
+          const walletToName = getWalletInfo_eth(toAddress);
           // winston.debug("43", walletToName);
-          const link = "https://etherscan.io/tx/" + txHash;
+          const link = "https://kimchiwhale.io/tx/" + txHash;
           const price = await getPrice("pla"); //current price!!
           const pla_amount = Number(ethers.utils.formatEther(value));
           //console.log("70", mbx_amount);
@@ -883,6 +879,462 @@ async function plaAlert() {
   startConnection();
 }
 
+async function nptAlert() {
+  const wsETHUrl = process.env.WSETHURL;
+  winston.debug(wsETHUrl);
+  const networkId = 1;
+  const threshold = process.env.Threshold_NPT;
+  winston.debug("736", threshold);
+  const EXPECTED_PONG_BACK = 15000;
+  const KEEP_ALIVE_CHECK_INTERVAL = 7500;
+  const network_id_pair = { networkId: "NPT" };
+  let provider;
+  let erc20;
+  const startConnection = () => {
+    console.log("738");
+    provider = new ethers.providers.WebSocketProvider(wsETHUrl, networkId); //setting up a WebSocket connection to an Ethereum node.
+    let pingTimeout = null;
+    let keepAliveInterval = null;
+    provider._websocket.on("open", () => {
+      keepAliveInterval = setInterval(() => {
+        winston.debug(
+          "Checking if the NPT connection is alive, sending a ping"
+        );
+
+        provider._websocket.ping();
+
+        // Use `WebSocket#terminate()`, which immediately destroys the connection,
+        // instead of `WebSocket#close()`, which waits for the close timer.
+        // Delay should be equal to the interval at which your server
+        // sends out pings plus a conservative assumption of the latency.
+        pingTimeout = setTimeout(() => {
+          provider._websocket.terminate();
+        }, EXPECTED_PONG_BACK);
+      }, KEEP_ALIVE_CHECK_INTERVAL);
+
+      // TODO: handle contract listeners setup + indexing
+    });
+    const abi = [
+      // Read-Only Functions
+      "function balanceOf(address owner) view returns (uint256)",
+      "function decimals() view returns (uint8)",
+      "function symbol() view returns (string)",
+
+      // Authenticated Functions
+      "function transfer(address to, uint amount) returns (bool)",
+
+      // Events
+      "event Transfer(address indexed from, address indexed to, uint amount)",
+    ];
+    const nptAddress = "0x306ee01a6bA3b4a8e993fA2C1ADC7ea24462000c";
+    erc20 = new ethers.Contract(nptAddress, abi, provider);
+    //sets up an event listener for the "Transfer" event of the ERC-20 token contract.
+    erc20.on("Transfer", async (from, to, amount, event) => {
+      console.log("758");
+      keepAliveInterval = setInterval(() => {
+        winston.debug(
+          "Checking if the NPT connection is alive, sending a ping"
+        );
+
+        provider._websocket.ping();
+
+        pingTimeout = setTimeout(() => {
+          provider._websocket.terminate();
+        }, EXPECTED_PONG_BACK);
+      }, KEEP_ALIVE_CHECK_INTERVAL);
+
+      try {
+        //console.log("event", event)
+        const value = amount;
+        const txHash = event.transactionHash; //event tx -> console.log
+        const whaleThreshold = ethers.utils.parseEther(threshold);
+
+        if (value.gte(whaleThreshold)) {
+          winston.debug("npt in", value);
+          const thisTx = await provider.getTransaction(txHash);
+          //console.log("gettx", thisTx);
+          const receipt = await thisTx.wait();
+          const fromAddress = from;
+          const toAddress = to;
+          //winston.debug(fromAddress);
+          // winston.debug(toAddress);
+          const walletFromName = getWalletInfo_eth(fromAddress);
+          // winston.debug("41", walletFromName);
+          const walletToName = getWalletInfo_eth(toAddress);
+          // winston.debug("43", walletToName);
+          const link = "https://kimchiwhale.io/tx/" + txHash;
+          const price = await getPrice("npt"); //current price!!
+          const npt_amount = Number(ethers.utils.formatEther(value));
+          //console.log("70", mbx_amount);
+          const d_value_bigN = ethers.BigNumber.from(value)
+            .mul(price * 10 ** 10)
+            .div(10 ** 10);
+          const d_value = Number(ethers.utils.formatEther(d_value_bigN));
+          //console.log("73", d_value);
+          const message = `🐋 ${walletFromName}에서 ${walletToName}로 ${npt_amount.toLocaleString(
+            "en-US",
+            {
+              maximumFractionDigits: 0,
+            }
+          )} #NPT (${d_value.toLocaleString("en-US", {
+            maximumFractionDigits: 0,
+          })} 원) 전송 ${link}`; //kimchi.io/tx/txHash
+          const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
+
+          console.log("message", message);
+          const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
+          //console.log("USED", gasUsed);
+          const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
+          //console.log("gasFee", gasFee);
+          //console.log("Value", value, typeof value);
+          //console.log("gasFeeString", gasFee.toString());
+          const gasFeeToString = gasFee.toString();
+          const blockchainData = {
+            blockchainName: network_id_pair.networkId,
+            timestamp: new Date(),
+            txHash: txHash,
+            sender: walletFromName,
+            sender_full: fromAddress,
+            receiver: walletToName,
+            receiver_full: toAddress,
+            amount: ethers.utils.formatEther(value),
+            fee: gasFeeToString,
+            link: `https://etherscan.io/tx/`,
+          };
+
+          const db_result = insertBlockchainData(blockchainData, "npt"); //change it to 'test' when test in local
+
+          const tweetPromise = tweet(message);
+          const telegramPromise = telegram(message);
+          const discordPromise = discord(message);
+          await Promise.all([tweetPromise, telegramPromise, discordPromise]);
+        }
+      } catch (e) {
+        winston.error("npt winston error", e);
+      }
+    });
+
+    provider._websocket.on("close", () => {
+      winston.error("The npt websocket connection was closed");
+      clearInterval(keepAliveInterval);
+      clearTimeout(pingTimeout);
+      startConnection();
+    });
+
+    provider._websocket.on("pong", () => {
+      winston.debug(
+        "Received pong, so npt connection is alive, clearing the timeout"
+      );
+      clearInterval(pingTimeout);
+    });
+  };
+  startConnection();
+}
+
+async function bfcAlert() {
+  const wsETHUrl = process.env.WSETHURL;
+  winston.debug(wsETHUrl);
+  const networkId = 1;
+  const threshold = process.env.Threshold_BFC;
+  winston.debug("736", threshold);
+  const EXPECTED_PONG_BACK = 15000;
+  const KEEP_ALIVE_CHECK_INTERVAL = 7500;
+  const network_id_pair = { networkId: "BFC" };
+  let provider;
+  let erc20;
+  const startConnection = () => {
+    console.log("738");
+    provider = new ethers.providers.WebSocketProvider(wsETHUrl, networkId); //setting up a WebSocket connection to an Ethereum node.
+    let pingTimeout = null;
+    let keepAliveInterval = null;
+    provider._websocket.on("open", () => {
+      keepAliveInterval = setInterval(() => {
+        winston.debug(
+          "Checking if the BFC connection is alive, sending a ping"
+        );
+
+        provider._websocket.ping();
+
+        // Use `WebSocket#terminate()`, which immediately destroys the connection,
+        // instead of `WebSocket#close()`, which waits for the close timer.
+        // Delay should be equal to the interval at which your server
+        // sends out pings plus a conservative assumption of the latency.
+        pingTimeout = setTimeout(() => {
+          provider._websocket.terminate();
+        }, EXPECTED_PONG_BACK);
+      }, KEEP_ALIVE_CHECK_INTERVAL);
+
+      // TODO: handle contract listeners setup + indexing
+    });
+    const abi = [
+      // Read-Only Functions
+      "function balanceOf(address owner) view returns (uint256)",
+      "function decimals() view returns (uint8)",
+      "function symbol() view returns (string)",
+
+      // Authenticated Functions
+      "function transfer(address to, uint amount) returns (bool)",
+
+      // Events
+      "event Transfer(address indexed from, address indexed to, uint amount)",
+    ];
+    const bfcAddress = "0x0c7D5ae016f806603CB1782bEa29AC69471CAb9c";
+    erc20 = new ethers.Contract(bfcAddress, abi, provider);
+    //sets up an event listener for the "Transfer" event of the ERC-20 token contract.
+    erc20.on("Transfer", async (from, to, amount, event) => {
+      console.log("758");
+      keepAliveInterval = setInterval(() => {
+        winston.debug(
+          "Checking if the BFC connection is alive, sending a ping"
+        );
+
+        provider._websocket.ping();
+
+        pingTimeout = setTimeout(() => {
+          provider._websocket.terminate();
+        }, EXPECTED_PONG_BACK);
+      }, KEEP_ALIVE_CHECK_INTERVAL);
+
+      try {
+        //console.log("event", event)
+        const value = amount;
+        const txHash = event.transactionHash; //event tx -> console.log
+        const whaleThreshold = ethers.utils.parseEther(threshold);
+
+        if (value.gte(whaleThreshold)) {
+          winston.debug("bfc in", value);
+          const thisTx = await provider.getTransaction(txHash);
+          //console.log("gettx", thisTx);
+          const receipt = await thisTx.wait();
+          const fromAddress = from;
+          const toAddress = to;
+          //winston.debug(fromAddress);
+          // winston.debug(toAddress);
+          const walletFromName = getWalletInfo_eth(fromAddress);
+          // winston.debug("41", walletFromName);
+          const walletToName = getWalletInfo_eth(toAddress);
+          // winston.debug("43", walletToName);
+          const link = "https://kimchiwhale.io/tx/" + txHash;
+          const price = await getPrice("bfc"); //current price!!
+          const bfc_amount = Number(ethers.utils.formatEther(value));
+          //console.log("70", mbx_amount);
+          const d_value_bigN = ethers.BigNumber.from(value)
+            .mul(price * 10 ** 10)
+            .div(10 ** 10);
+          const d_value = Number(ethers.utils.formatEther(d_value_bigN));
+          //console.log("73", d_value);
+          const message = `🐋 ${walletFromName}에서 ${walletToName}로 ${bfc_amount.toLocaleString(
+            "en-US",
+            {
+              maximumFractionDigits: 0,
+            }
+          )} #BFC (${d_value.toLocaleString("en-US", {
+            maximumFractionDigits: 0,
+          })} 원) 전송 ${link}`; //kimchi.io/tx/txHash
+          const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
+
+          console.log("message", message);
+          const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
+          //console.log("USED", gasUsed);
+          const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
+          //console.log("gasFee", gasFee);
+          //console.log("Value", value, typeof value);
+          //console.log("gasFeeString", gasFee.toString());
+          const gasFeeToString = gasFee.toString();
+          const blockchainData = {
+            blockchainName: network_id_pair.networkId,
+            timestamp: new Date(),
+            txHash: txHash,
+            sender: walletFromName,
+            sender_full: fromAddress,
+            receiver: walletToName,
+            receiver_full: toAddress,
+            amount: ethers.utils.formatEther(value),
+            fee: gasFeeToString,
+            link: `https://etherscan.io/tx/`,
+          };
+
+          const db_result = insertBlockchainData(blockchainData, "bfc"); //change it to 'test' when test in local
+
+          const tweetPromise = tweet(message);
+          const telegramPromise = telegram(message);
+          const discordPromise = discord(message);
+          await Promise.all([tweetPromise, telegramPromise, discordPromise]);
+        }
+      } catch (e) {
+        winston.error("bfc winston error", e);
+      }
+    });
+
+    provider._websocket.on("close", () => {
+      winston.error("The bfc websocket connection was closed");
+      clearInterval(keepAliveInterval);
+      clearTimeout(pingTimeout);
+      startConnection();
+    });
+
+    provider._websocket.on("pong", () => {
+      winston.debug(
+        "Received pong, so bfc connection is alive, clearing the timeout"
+      );
+      clearInterval(pingTimeout);
+    });
+  };
+  startConnection();
+}
+
+async function ctcAlert() {
+  const wsETHUrl = process.env.WSETHURL;
+  winston.debug(wsETHUrl);
+  const networkId = 1;
+  const threshold = process.env.Threshold_CTC;
+  winston.debug("736", threshold);
+  const EXPECTED_PONG_BACK = 15000;
+  const KEEP_ALIVE_CHECK_INTERVAL = 7500;
+  const network_id_pair = { networkId: "CTC" };
+  let provider;
+  let erc20;
+  const startConnection = () => {
+    console.log("738");
+    provider = new ethers.providers.WebSocketProvider(wsETHUrl, networkId); //setting up a WebSocket connection to an Ethereum node.
+    let pingTimeout = null;
+    let keepAliveInterval = null;
+    provider._websocket.on("open", () => {
+      keepAliveInterval = setInterval(() => {
+        winston.debug(
+          "Checking if the CTC connection is alive, sending a ping"
+        );
+
+        provider._websocket.ping();
+
+        // Use `WebSocket#terminate()`, which immediately destroys the connection,
+        // instead of `WebSocket#close()`, which waits for the close timer.
+        // Delay should be equal to the interval at which your server
+        // sends out pings plus a conservative assumption of the latency.
+        pingTimeout = setTimeout(() => {
+          provider._websocket.terminate();
+        }, EXPECTED_PONG_BACK);
+      }, KEEP_ALIVE_CHECK_INTERVAL);
+
+      // TODO: handle contract listeners setup + indexing
+    });
+    const abi = [
+      // Read-Only Functions
+      "function balanceOf(address owner) view returns (uint256)",
+      "function decimals() view returns (uint8)",
+      "function symbol() view returns (string)",
+
+      // Authenticated Functions
+      "function transfer(address to, uint amount) returns (bool)",
+
+      // Events
+      "event Transfer(address indexed from, address indexed to, uint amount)",
+    ];
+    const ctcAddress = "0xa3ee21c306a700e682abcdfe9baa6a08f3820419";
+    erc20 = new ethers.Contract(ctcAddress, abi, provider);
+    //sets up an event listener for the "Transfer" event of the ERC-20 token contract.
+    erc20.on("Transfer", async (from, to, amount, event) => {
+      console.log("758");
+      keepAliveInterval = setInterval(() => {
+        winston.debug(
+          "Checking if the CTC connection is alive, sending a ping"
+        );
+
+        provider._websocket.ping();
+
+        pingTimeout = setTimeout(() => {
+          provider._websocket.terminate();
+        }, EXPECTED_PONG_BACK);
+      }, KEEP_ALIVE_CHECK_INTERVAL);
+
+      try {
+        //console.log("event", event)
+        const value = amount;
+        const txHash = event.transactionHash; //event tx -> console.log
+        const whaleThreshold = ethers.utils.parseEther(threshold);
+
+        if (value.gte(whaleThreshold)) {
+          winston.debug("ctc in", value);
+          const thisTx = await provider.getTransaction(txHash);
+          //console.log("gettx", thisTx);
+          const receipt = await thisTx.wait();
+          const fromAddress = from;
+          const toAddress = to;
+          winston.debug(fromAddress);
+          winston.debug(toAddress);
+          const walletFromName = getWalletInfo_eth(fromAddress);
+           winston.debug("41", walletFromName);
+          const walletToName = getWalletInfo_eth(toAddress);
+          winston.debug("43", walletToName);
+          const link = "https://kimchiwhale.io/tx/" + txHash;
+          const price = await getPrice("ctc"); //current price!!
+          const ctc_amount = Number(ethers.utils.formatEther(value));
+          console.log("70", ctc_amount);
+          const d_value_bigN = ethers.BigNumber.from(value)
+            .mul(price * 10 ** 10)
+            .div(10 ** 10);
+          const d_value = Number(ethers.utils.formatEther(d_value_bigN));
+          //console.log("73", d_value);
+          const message = `🐋 ${walletFromName}에서 ${walletToName}로 ${ctc_amount.toLocaleString(
+            "en-US",
+            {
+              maximumFractionDigits: 0,
+            }
+          )} #CTC (${d_value.toLocaleString("en-US", {
+            maximumFractionDigits: 0,
+          })} 원) 전송 ${link}`; //kimchi.io/tx/txHash
+          console.log("msg", message)
+          const gasPrice = ethers.utils.formatEther(thisTx["gasPrice"]._hex);
+
+          console.log("message", message);
+          const gasUsed = ethers.utils.formatEther(receipt.gasUsed._hex);
+          //console.log("USED", gasUsed);
+          const gasFee = gasUsed * gasPrice * 10 ** 18; ////how to make gasFee * 10^18?? in better way??
+          //console.log("gasFee", gasFee);
+          //console.log("Value", value, typeof value);
+          //console.log("gasFeeString", gasFee.toString());
+          const gasFeeToString = gasFee.toString();
+          const blockchainData = {
+            blockchainName: network_id_pair.networkId,
+            timestamp: new Date(),
+            txHash: txHash,
+            sender: walletFromName,
+            sender_full: fromAddress,
+            receiver: walletToName,
+            receiver_full: toAddress,
+            amount: ethers.utils.formatEther(value),
+            fee: gasFeeToString,
+            link: `https://etherscan.io/tx/`,
+          };
+
+          const db_result = insertBlockchainData(blockchainData, "ctc"); //change it to 'test' when test in local
+
+          const tweetPromise = tweet(message);
+          const telegramPromise = telegram(message);
+          const discordPromise = discord(message);
+          await Promise.all([tweetPromise, telegramPromise, discordPromise]);
+        }
+      } catch (e) {
+        winston.error("ctc winston error", e);
+      }
+    });
+
+    provider._websocket.on("close", () => {
+      winston.error("The ctc websocket connection was closed");
+      clearInterval(keepAliveInterval);
+      clearTimeout(pingTimeout);
+      startConnection();
+    });
+
+    provider._websocket.on("pong", () => {
+      winston.debug(
+        "Received pong, so ctc connection is alive, clearing the timeout"
+      );
+      clearInterval(pingTimeout);
+    });
+  };
+  startConnection();
+}
 
 async function klevaAlert() {
   const wsUrl = process.env.wsUrl_klaytn;
@@ -1039,7 +1491,7 @@ async function ssxAlert() {
         );
 
         provider._websocket.ping();
- 
+
         // Use `WebSocket#terminate()`, which immediately destroys the connection,
         // instead of `WebSocket#close()`, which waits for the close timer.
         // Delay should be equal to the interval at which your server
@@ -1151,40 +1603,38 @@ async function ssxAlert() {
 async function fnsaAlert() {
   console.log("before");
   const startConnection = () => {
-  console.log("866");
-  const wsEndpoint = process.env.FINSCHIA_RPC;
-  const wsClient = new WebsocketClient(wsEndpoint, (err) =>
-    console.log("ws client error " + JSON.stringify(err))
-  );
-  console.log("878");
-  let stream = wsClient.listen({
-    jsonrpc: "2.0",
-    method: "subscribe",
-    id: 0,
-    params: {
-      query: "tm.event='NewBlockHeader'",
-    },
-  });
-  console.log("882", stream);
-  stream.addListener({
-    
-    complete: () => {
-      console.log("complete");
-    },
-    error: (err) => {
-      console.log("error: " + JSON.stringify(err));
-    },
-    next: (newtx) => {
-      try {
-        console.log("newTX", newtx)
-       
-      } catch (err) {
-        console.log(JSON.stringify(err));
-      }
-    },
-  });
-} 
-startConnection()
+    console.log("866");
+    const wsEndpoint = process.env.FINSCHIA_RPC;
+    const wsClient = new WebsocketClient(wsEndpoint, (err) =>
+      console.log("ws client error " + JSON.stringify(err))
+    );
+    console.log("878");
+    let stream = wsClient.listen({
+      jsonrpc: "2.0",
+      method: "subscribe",
+      id: 0,
+      params: {
+        query: "tm.event='NewBlockHeader'",
+      },
+    });
+    console.log("882", stream);
+    stream.addListener({
+      complete: () => {
+        console.log("complete");
+      },
+      error: (err) => {
+        console.log("error: " + JSON.stringify(err));
+      },
+      next: (newtx) => {
+        try {
+          console.log("newTX", newtx);
+        } catch (err) {
+          console.log(JSON.stringify(err));
+        }
+      },
+    });
+  };
+  startConnection();
 }
 
 async function fetchWalletInfo(address) {
@@ -1200,16 +1650,18 @@ async function fetchWalletInfo(address) {
   return walletName;
 }
 
-function getWalletInfo_eth(address, result) {
+function getWalletInfo_eth(address) {
   winston.debug("getwallet");
-
+ console.log("1656 address", address)
   const addressShort = address.slice(0, 7) + "..." + address.slice(37, 42);
   winston.debug("short", addressShort);
-
-  winston.debug("result", result[address]);
-  const walletName = addressShort;
+ 
+  let walletName
   if (result_eth[address]) {
     walletName = result_eth[address].name;
+  } else {
+    console.log("no known name")
+    walletName = addressShort;
   }
   winston.debug("from_wallet_name: " + walletName);
   return walletName;
@@ -1245,30 +1697,21 @@ async function insertBlockchainData(data, symbol) {
 
 async function getPrice(symbol) {
   try {
-    // Make a request to the CoinMarketCap API for USD
+    // Create an instance of the Upbit exchange
+    const exchange = new ccxt.bithumb({ enableRateLimit: true });
 
-    // Make a request to the CoinMarketCap API for KRW
-    const krwResponse = await fetch(
-      `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=${symbol}&convert=KRW`,
-      {
-        headers: {
-          "X-CMC_PRO_API_KEY": process.env.COINMARKETCAP,
-        },
-      }
-    );
+    // Fetch ticker data for the specified symbol
+    const formattedSymbol = symbol.toUpperCase() + "/KRW"; // Convert to uppercase and add "/KRW"
+    const ticker = await exchange.fetchTicker(formattedSymbol);
 
-    // Check if both requests were successful
-    if (krwResponse.status === 200) {
-      //const usdData = await usdResponse.json();
-      const krwData = await krwResponse.json();
+    // Check if the ticker data was successfully fetched
+    if (ticker) {
+      // Extract the current price
+      const currentPriceKRW = ticker.last;
+      console.log("1717", currentPriceKRW);
+      console.log("1718", currentPriceKRW.toFixed(10));
 
-      //const usdQuote = usdData.data[symbol].quote.USD;
-      const krwQuote = krwData.data[symbol].quote.KRW;
-
-      // Extract relevant data
-      //const currentPriceUSD = usdQuote.price;
-      const currentPriceKRW = krwQuote.price;
-      //const priceChange24h = usdQuote.percent_change_24h;
+      // Return the current price in KRW
       return currentPriceKRW.toFixed(10);
     } else {
       throw "Failed to fetch cryptocurrency data";
