@@ -32,6 +32,7 @@ async function connectToMongoDB() {
 async function main() {
   connectToMongoDB();
   //Initial fetch when the server starts
+  
   klaytnAlert();
   wemixAlert();
   mbxAlert();
@@ -41,7 +42,7 @@ async function main() {
   ssxAlert();
   //nptAlert();
   //bfcAlert();
-  ctcAlert();
+  //ctcAlert();
   setInterval(() => console.log("keepalive"), 60 * 5 * 1000);
 }
 

@@ -19,8 +19,8 @@ jobs:
       if: contains(github.ref, 'main')
       with:
         host: ${{ secrets.HOST_PROD }} # EC2 퍼블릭 IPv4 DNS
-        username: ubuntu
-        key: ${{ secrets.PRIVATE_KEY }} #ssh pk(?)
+        username: ec2-user
+        key: ${{ secrets.PRIVATE_KEY }} #.pem private key
         envs: GITHUB_SHA
         script: |
           sudo docker pull haileythegooner/klaytn_alert:latest
