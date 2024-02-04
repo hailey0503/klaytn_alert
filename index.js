@@ -31,36 +31,33 @@ async function connectToMongoDB() {
 
 async function main() {
   connectToMongoDB();
-  const klaytnWsUrl = process.env.wsUrl_klaytn;
-  const klaytnNetworkId = 8217;
-  const klaytnProvider = new ethers.providers.WebSocketProvider(klaytnWsUrl, klaytnNetworkId);
   //Initial fetch when the server starts
   
-  klaytnAlert(klaytnProvider);
+  klaytnAlert();
   wemixAlert();
-  mbxAlert(klaytnProvider);
-  boraAlert(klaytnProvider);
+  //mbxAlert();
+  //boraAlert();
   //ghubAlert();
   //plaAlert()
-  ssxAlert(klaytnProvider);
+   ssxAlert();
   //nptAlert();
   //bfcAlert();
   //ctcAlert();
   setInterval(() => console.log("keepalive"), 60 * 5 * 1000);
 }
 
-async function klaytnAlert(provider) {
-  //const wsUrl = process.env.wsUrl_klaytn;
-  //winston.debug(wsUrl);
-  //const networkId = 8217;
+async function klaytnAlert() {
+  const wsUrl = process.env.wsUrl_klaytn;
+  winston.debug(wsUrl);
+  const networkId = 8217;
   const threshold = process.env.Threshold_KLAY;
   winston.debug("37", threshold);
 
   const EXPECTED_PONG_BACK = 15000;
   const KEEP_ALIVE_CHECK_INTERVAL = 7500;
-  //let provider;
+  let provider;
   const startConnection = () => {
-    //provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
+    provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
 
     let pingTimeout = null;
     let keepAliveInterval = null;
@@ -337,19 +334,19 @@ async function wemixAlert() {
   startConnection();
 }
 
-async function mbxAlert(provider) {
-  //const wsUrl = process.env.wsUrl_klaytn;
-  //winston.debug(wsUrl);
-  //const networkId = 8217;
+async function mbxAlert() {
+  const wsUrl = process.env.wsUrl_klaytn;
+  winston.debug(wsUrl);
+  const networkId = 8217;
   const threshold = process.env.Threshold_MBX;
   winston.debug("332", threshold);
   const EXPECTED_PONG_BACK = 15000;
   const KEEP_ALIVE_CHECK_INTERVAL = 7500;
   const network_id_pair = { networkId: "MBX" };
-  //let provider;
+  let provider;
   let contract;
   const startConnection = () => {
-    //provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
+    provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
     let pingTimeout = null;
     let keepAliveInterval = null;
 
@@ -471,19 +468,19 @@ async function mbxAlert(provider) {
   startConnection();
 }
 
-async function boraAlert(provider) {
-  //const wsUrl = process.env.wsUrl_klaytn;
-  //winston.debug(wsUrl);
-  //const networkId = 8217;
+async function boraAlert() {
+  const wsUrl = process.env.wsUrl_klaytn;
+  winston.debug(wsUrl);
+  const networkId = 8217;
   const threshold = process.env.Threshold_BORA;
   winston.debug("466", threshold);
   const EXPECTED_PONG_BACK = 15000;
   const KEEP_ALIVE_CHECK_INTERVAL = 7500;
   const network_id_pair = { networkId: "BORA" };
-  //let provider;
+  let provider;
   let contract;
   const startConnection = () => {
-   // provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
+    provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
     let pingTimeout = null;
     let keepAliveInterval = null;
 
@@ -603,19 +600,19 @@ async function boraAlert(provider) {
   startConnection();
 }
 
-async function ghubAlert(provider) {
-  //const wsUrl = process.env.wsUrl_klaytn;
-  //winston.debug(wsUrl);
-  //const networkId = 8217;
+async function ghubAlert() {
+  const wsUrl = process.env.wsUrl_klaytn;
+  winston.debug(wsUrl);
+  const networkId = 8217;
   const threshold = process.env.Threshold_GHUB;
   winston.debug("599", threshold);
   const EXPECTED_PONG_BACK = 15000;
   const KEEP_ALIVE_CHECK_INTERVAL = 7500;
   const network_id_pair = { networkId: "GHUB" };
-  //let provider;
+  let provider;
   let contract;
   const startConnection = () => {
-   // provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
+    provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
     let pingTimeout = null;
     let keepAliveInterval = null;
 
@@ -1340,19 +1337,19 @@ async function ctcAlert() {
   startConnection();
 }
 
-async function klevaAlert(provider) {
-  //const wsUrl = process.env.wsUrl_klaytn;
-  //winston.debug(wsUrl);
-  //const networkId = 8217;
+async function klevaAlert() {
+  const wsUrl = process.env.wsUrl_klaytn;
+  winston.debug(wsUrl);
+  const networkId = 8217;
   const threshold = process.env.Threshold_KLEVA;
   winston.debug("466", threshold);
   const EXPECTED_PONG_BACK = 15000;
   const KEEP_ALIVE_CHECK_INTERVAL = 7500;
   const network_id_pair = { networkId: "KLEVA" };
-  //let provider;
+  let provider;
   let contract;
   const startConnection = () => {
-    //provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
+    provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
     let pingTimeout = null;
     let keepAliveInterval = null;
 
@@ -1472,19 +1469,19 @@ async function klevaAlert(provider) {
   startConnection();
 }
 
-async function ssxAlert(provider) {
-  //const wsUrl = process.env.wsUrl_klaytn;
-  //winston.debug(wsUrl);
-  //const networkId = 8217;
+async function ssxAlert() {
+  const wsUrl = process.env.wsUrl_klaytn;
+  winston.debug(wsUrl);
+  const networkId = 8217;
   const threshold = process.env.Threshold_SSX;
   winston.debug("466", threshold);
   const EXPECTED_PONG_BACK = 15000;
   const KEEP_ALIVE_CHECK_INTERVAL = 7500;
   const network_id_pair = { networkId: "SSX" };
-  //let provider;
+  let provider;
   let contract;
   const startConnection = () => {
-    //provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
+    provider = new ethers.providers.WebSocketProvider(wsUrl, networkId);
     let pingTimeout = null;
     let keepAliveInterval = null;
 
