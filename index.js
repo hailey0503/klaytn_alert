@@ -359,7 +359,7 @@ async function mbxAlert(provider) {
           "Checking if the mbx connection is alive, sending a ping"
         );
 
-        // provider._websocket.ping();
+        provider._websocket.ping();
 
         // Use `WebSocket#terminate()`, which immediately destroys the connection,
         // instead of `WebSocket#close()`, which waits for the close timer.
@@ -460,14 +460,13 @@ async function mbxAlert(provider) {
       clearTimeout(pingTimeout);
       startConnection();
     });
-/*
+
     provider._websocket.on("pong", () => {
       winston.debug(
         "Received pong, so mbx connection is alive, clearing the timeout"
       );
       clearInterval(pingTimeout);
     });
-    */
   };
   startConnection();
 }
@@ -494,7 +493,7 @@ async function boraAlert(provider) {
           "Checking if the Bora connection is alive, sending a ping"
         );
 
-       // provider._websocket.ping();
+        provider._websocket.ping();
 
         // Use `WebSocket#terminate()`, which immediately destroys the connection,
         // instead of `WebSocket#close()`, which waits for the close timer.
@@ -593,13 +592,13 @@ async function boraAlert(provider) {
       clearTimeout(pingTimeout);
       startConnection();
     });
-/*
+
     provider._websocket.on("pong", () => {
       winston.debug(
         "Received pong, so bora connection is alive, clearing the timeout"
       );
       clearInterval(pingTimeout);
-    }); */
+    });
   };
   startConnection();
 }
@@ -626,7 +625,7 @@ async function ghubAlert(provider) {
           "Checking if the Ghub connection is alive, sending a ping"
         );
 
-       // provider._websocket.ping();
+        provider._websocket.ping();
 
         pingTimeout = setTimeout(() => {
           provider._websocket.terminate();
@@ -721,13 +720,13 @@ async function ghubAlert(provider) {
       clearTimeout(pingTimeout);
       startConnection();
     });
-/*
+
     provider._websocket.on("pong", () => {
       winston.debug(
         "Received pong, so ghub connection is alive, clearing the timeout"
       );
       clearInterval(pingTimeout);
-    }); */
+    });
   };
   startConnection();
 }
@@ -1363,7 +1362,7 @@ async function klevaAlert(provider) {
           "Checking if the KLEVA connection is alive, sending a ping"
         );
 
-       // provider._websocket.ping();
+        provider._websocket.ping();
 
         // Use `WebSocket#terminate()`, which immediately destroys the connection,
         // instead of `WebSocket#close()`, which waits for the close timer.
@@ -1462,13 +1461,13 @@ async function klevaAlert(provider) {
       clearTimeout(pingTimeout);
       startConnection();
     });
-/*
+
     provider._websocket.on("pong", () => {
       winston.debug(
         "Received pong, so kleva connection is alive, clearing the timeout"
       );
       clearInterval(pingTimeout);
-    }); */
+    });
   };
   startConnection();
 }
@@ -1495,7 +1494,7 @@ async function ssxAlert(provider) {
           "Checking if the SSX connection is alive, sending a ping"
         );
 
-       // provider._websocket.ping();
+        provider._websocket.ping();
 
         // Use `WebSocket#terminate()`, which immediately destroys the connection,
         // instead of `WebSocket#close()`, which waits for the close timer.
@@ -1594,13 +1593,13 @@ async function ssxAlert(provider) {
       clearTimeout(pingTimeout);
       startConnection();
     });
-/*
+
     provider._websocket.on("pong", () => {
       winston.debug(
         "Received pong, so ssx connection is alive, clearing the timeout"
       );
       clearInterval(pingTimeout);
-    });*/
+    });
   };
   startConnection();
 }
