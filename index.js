@@ -116,9 +116,9 @@ async function klaytnAlert() {
             const link = "https://kimchiwhale.io/tx/" + txHash;
             const price = await getPrice("KLAY"); //current price!!
             const klay_amount = Number(ethers.utils.formatEther(value));
-            console.log("117 currnet krw price returned", price);
-            console.log("118 value (bignumber)", value);
-            console.log("119 value to number", klay_amount);
+            //console.log("117 currnet krw price returned", price);
+            //console.log("118 value (bignumber)", value);
+            //console.log("119 value to number", klay_amount);
 
             const d_value_bigN = ethers.BigNumber.from(value)
               .mul(price * 10 ** 10)
